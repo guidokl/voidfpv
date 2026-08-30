@@ -104,3 +104,28 @@ verhält, bevor jemand die Polizei ruft.
 - Grundgerüst Astro 5, statisch, GitHub-Pages-tauglich
 - Design-System „OSD" (Tokens, Rail, Top-Bar, Panels, Status-LEDs)
 - Wissensbasis aus `MyDocs/Avata-2-Pilot-Guide.md` überführt
+
+---
+
+## Stand bei Übergabe (30.08.2026)
+
+Alle 14 Bereiche stehen und sind gebaut, Build läuft ohne Fehler und Hinweise,
+erster Push auf `main` ist raus. GitHub Pages steht auf „GitHub Actions".
+
+**Als Nächstes:**
+
+1. **Deploy prüfen** — Actions-Tab beobachten, dann https://guidokl.github.io/voidfpv
+   aufrufen. Falls 404: `base` in `astro.config.mjs` gegen den Repo-Namen halten.
+2. **Impressum und Datenschutz ausfüllen** — die mit `AUSFÜLLEN` markierten Felder in
+   `src/pages/impressum.astro` und `src/pages/datenschutz.astro`. Bis dahin ist die Seite
+   zwar online, aber formal unvollständig.
+3. **Ersten Spot anlegen** unter `src/content/spots/` — dann wird das Wetter-Briefing mit
+   einem Klick statt mit Koordinaten bedienbar.
+4. **Sim-Sessions eintragen**, sobald der Controller da ist.
+
+**Zwei Links konnten nicht automatisch geprüft werden:** `getfpv.com` und `intofpv.com`
+antworten auf automatisierte Anfragen mit HTTP 403 (Bot-Schutz, keine toten Domains).
+Beim nächsten Mal im Browser gegenprüfen und `lastChecked` bestätigen.
+
+**Noch nicht gebaut, bewusst offen:** Journal-/Blog-Bereich, Spot-Karte,
+automatischer Flug-Log-Import — stehen oben in diesem Dokument.

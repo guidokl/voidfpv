@@ -16,28 +16,13 @@ import { href } from '~/lib/format';
     <div class="rule" aria-hidden="true"></div>
   </header>
 
-  <Panel label="Auszufüllen" tone="alert">
-    <p class="todo">
-      <span class="mono-label">Achtung</span>
-      Diese Seite ist ein <strong>Gerüst</strong>. Vor der Veröffentlichung müssen die Felder mit
-      <code>AUSFÜLLEN</code> durch die echten Angaben ersetzt werden — in
-      <code>src/pages/impressum.astro</code>.
-    </p>
-    <p class="todo-sub">
-      Für eine rein private, nicht kommerzielle Seite ohne Werbung, Sponsoring und
-      Affiliate-Links ist die Impressumspflicht nach § 5 DDG umstritten. Sobald aber Einnahmen,
-      Kooperationen oder Reichweitenabsichten dazukommen, ist sie eindeutig. Eine korrekte
-      Angabe kostet nichts und beendet die Diskussion.
-    </p>
-  </Panel>
-
   <Panel label="Angaben gemäß § 5 DDG">
     <dl class="fields">
-      <div><dt>Name</dt><dd class="fill">AUSFÜLLEN — Vor- und Nachname</dd></div>
-      <div><dt>Anschrift</dt><dd class="fill">AUSFÜLLEN — Straße, Hausnummer</dd></div>
-      <div><dt>PLZ, Ort</dt><dd class="fill">AUSFÜLLEN</dd></div>
+      <div><dt>Name</dt><dd>Guido Kleine</dd></div>
+      <div><dt>Anschrift</dt><dd>Zur Eckernheide 10</dd></div>
+      <div><dt>PLZ, Ort</dt><dd>48157 Münster</dd></div>
       <div><dt>Land</dt><dd>Deutschland</dd></div>
-      <div><dt>E-Mail</dt><dd class="fill">AUSFÜLLEN — Kontaktadresse</dd></div>
+      <div><dt>E-Mail</dt><dd><a href="mailto:guidokl@pm.me">guidokl@pm.me</a></dd></div>
     </dl>
     <p class="note">
       Eine Postfachadresse reicht nicht aus; es muss eine ladungsfähige Anschrift sein. Wer die
@@ -48,7 +33,7 @@ import { href } from '~/lib/format';
 
   <Panel label="Verantwortlich für den Inhalt">
     <dl class="fields">
-      <div><dt>Nach § 18 Abs. 2 MStV</dt><dd class="fill">AUSFÜLLEN — Name und Anschrift wie oben</dd></div>
+      <div><dt>Nach § 18 Abs. 2 MStV</dt><dd>Guido Kleine, Zur Eckernheide 10, 48157 Münster</dd></div>
     </dl>
   </Panel>
 

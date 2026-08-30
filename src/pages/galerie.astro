@@ -1,0 +1,152 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import EmptyState from '~/components/EmptyState.astro';
+import Lightbox from '~/components/Lightbox.astro';
+import { href, fmtDate } from '~/lib/format';
+
+const shots = (await getCollection('gallery')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+---
+
+<Base
+  title="Galerie"
+  description="Fotos und Clips aus der Luft — mit Ort, Datum und Aufnahmeeinstellungen."
+  path="/galerie"
+>
+  <SectionHead
+    index="09"
+    title="Galerie"
+    lead="Material ohne Text drumherum. Jedes Bild mit Datum, Ort und Einstellungen — damit später nachvollziehbar bleibt, wie eine Aufnahme entstanden ist."
+    meta={shots.length > 0 ? `${shots.length} Aufnahmen` : 'noch leer'}
+  />
+
+  {
+    shots.length > 0 ? (
+      <>
+        <div class="grid">
+          {
+            shots.map((s) => (
+              <button
+                class="shot"
+                type="button"
+                data-lb-open
+                data-lb-full={s.data.image.src}
+                data-lb-caption={s.data.caption}
+                data-lb-meta={[
+                  fmtDate(s.data.date),
+                  s.data.location,
+                  s.data.drone,
+                  s.data.settings,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              >
+                <Image
+                  src={s.data.image}
+                  alt={s.data.caption}
+                  widths={[400, 800, 1200]}
+                  sizes="(max-width: 700px) 100vw, 33vw"
+                  loading="lazy"
+                />
+                <span class="overlay">
+                  <span class="cap">{s.data.caption}</span>
+                  <span class="meta mono-label">
+                    {fmtDate(s.data.date)}
+                    {s.data.location ? ` · ${s.data.location}` : ''}
+                  </span>
+                </span>
+              </button>
+            ))
+          }
+        </div>
+        <Lightbox />
+      </>
+    ) : (
+      <Panel label="Status" meta="Pre-Flight">
+        <EmptyState
+          code="IMG 00"
+          title="Noch keine Aufnahmen"
+          reason="Ohne Drohne kein Material. Die Galerie ist vorbereitet: Bilder kommen nach src/assets/gallery/, dazu eine kurze Markdown-Datei mit Bildunterschrift, Datum, Ort und Einstellungen. Astro erzeugt daraus automatisch AVIF und WebP in mehreren Größen."
+          next="Erste Session abwarten. Vor dem Veröffentlichen: GPS-Daten aus den Bildern entfernen — ExifTool steht unter Tools."
+        >
+          <div class="empty-actions">
+            <a class="btn" href={href('/tools')}>ExifTool und Workflow</a>
+            <a class="btn" href={href('/berichte')}>Berichte</a>
+          </div>
+        </EmptyState>
+      </Panel>
+    )
+  }
+
+  <Panel label="Bevor ein Bild online geht" tone="alert">
+    <ul class="rules">
+      <li><b>GPS-Daten entfernen</b><span>Sonst steht der Spot metergenau im Netz — bei Lost Places besonders heikel.</span></li>
+      <li><b>Erkennbare Personen</b><span>Einwilligung einholen oder unkenntlich machen. Bei Kindern im Zweifel gar nicht.</span></li>
+      <li><b>Kunst aus der Luft</b><span>Panoramafreiheit gilt laut BGH nicht für Drohnenaufnahmen. Street-Art und Skulpturen von oben nicht einfach hochladen.</span></li>
+      <li><b>Fremde Grundstücke</b><span>Blick in Gärten und Innenhöfe bleibt offline, auch wenn der Flug selbst zulässig war.</span></li>
+    </ul>
+    <p class="txt">
+      Ausführlich im <a href={`${href('/wissen')}#05-recht-veroeffentlichen`}>Rechtsteil</a>.
+    </p>
+  </Panel>
+</Base>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--s3);
+    margin-bottom: var(--s5);
+  }
+  .shot {
+    position: relative;
+    display: block;
+    padding: 0;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    background: var(--panel);
+  }
+  .shot img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    transition: opacity var(--dur) var(--ease);
+  }
+  .shot:hover img { opacity: 0.55; }
+
+  .overlay {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: var(--s3);
+    display: grid;
+    gap: 2px;
+    text-align: left;
+    background: linear-gradient(to top, rgba(5, 6, 8, 0.92), transparent);
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease);
+  }
+  .shot:hover .overlay, .shot:focus-visible .overlay { opacity: 1; }
+  .cap { font-size: var(--fs-small); color: var(--text); }
+
+  .empty-actions {
+    margin-top: var(--s5);
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--s3);
+  }
+
+  .rules { list-style: none; margin: 0; padding: 0; }
+  .rules li { padding: var(--s3) 0; border-bottom: 1px solid var(--line-faint); }
+  .rules li:last-child { border-bottom: none; }
+  .rules b { font-size: var(--fs-small); color: var(--text); }
+  .rules span { display: block; margin-top: 2px; font-size: var(--fs-small); color: var(--muted); }
+
+  .txt { margin-top: var(--s4); font-size: var(--fs-small); color: var(--muted); }
+</style>

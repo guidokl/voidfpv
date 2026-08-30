@@ -1,0 +1,132 @@
+---
+/**
+ * Vollbildansicht fuer die Galerie. Nutzt <dialog>, damit Fokus und Escape
+ * vom Browser kommen statt aus eigenem JavaScript.
+ */
+---
+
+<dialog class="lb" data-lightbox aria-label="Bildansicht">
+  <button class="close" type="button" data-lb-close aria-label="Schließen">×</button>
+  <button class="nav prev" type="button" data-lb-prev aria-label="Vorheriges Bild">‹</button>
+  <button class="nav next" type="button" data-lb-next aria-label="Nächstes Bild">›</button>
+
+  <figure>
+    <img data-lb-img alt="" />
+    <figcaption>
+      <span class="cap" data-lb-caption></span>
+      <span class="meta mono-label" data-lb-meta></span>
+      <span class="idx mono-label" data-lb-index></span>
+    </figcaption>
+  </figure>
+</dialog>
+
+<style>
+  .lb {
+    padding: 0;
+    border: none;
+    background: transparent;
+    max-width: 100vw;
+    max-height: 100dvh;
+    width: 100vw;
+    height: 100dvh;
+    color: var(--text);
+  }
+  .lb::backdrop { background: rgba(5, 6, 8, 0.94); }
+
+  figure {
+    margin: 0;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    place-items: center;
+    padding: var(--s7) var(--s7) var(--s5);
+  }
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border: 1px solid var(--line-strong);
+  }
+
+  figcaption {
+    width: 100%;
+    max-width: var(--content-max);
+    padding-top: var(--s4);
+    display: grid;
+    gap: var(--s1);
+    border-top: 1px solid var(--line);
+    margin-top: var(--s4);
+  }
+  .cap { font-size: var(--fs-small); color: var(--text-dim); }
+  .idx { color: var(--muted-deep); }
+
+  .close, .nav {
+    position: fixed;
+    z-index: 2;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line-strong);
+    background: var(--panel);
+    color: var(--text-dim);
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+  .close:hover, .nav:hover { color: var(--accent); border-color: var(--accent); }
+  .close { top: var(--s4); right: var(--s4); }
+  .prev { left: var(--s4); top: 50%; transform: translateY(-50%); }
+  .next { right: var(--s4); top: 50%; transform: translateY(-50%); }
+
+  @media (max-width: 700px) {
+    figure { padding: var(--s7) var(--s3) var(--s4); }
+    .prev { left: var(--s2); }
+    .next { right: var(--s2); }
+  }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox]');
+  const triggers = Array.from(document.querySelectorAll<HTMLElement>('[data-lb-open]'));
+
+  if (dialog && triggers.length) {
+    const img = dialog.querySelector<HTMLImageElement>('[data-lb-img]')!;
+    const caption = dialog.querySelector<HTMLElement>('[data-lb-caption]')!;
+    const meta = dialog.querySelector<HTMLElement>('[data-lb-meta]')!;
+    const index = dialog.querySelector<HTMLElement>('[data-lb-index]')!;
+
+    let current = 0;
+
+    const show = (i: number) => {
+      current = (i + triggers.length) % triggers.length;
+      const t = triggers[current]!;
+      img.src = t.dataset.lbFull ?? '';
+      img.alt = t.dataset.lbCaption ?? '';
+      caption.textContent = t.dataset.lbCaption ?? '';
+      meta.textContent = t.dataset.lbMeta ?? '';
+      index.textContent = `${current + 1} / ${triggers.length}`;
+    };
+
+    triggers.forEach((t, i) => {
+      t.addEventListener('click', () => {
+        show(i);
+        dialog.showModal();
+      });
+    });
+
+    dialog.querySelector('[data-lb-close]')!.addEventListener('click', () => dialog.close());
+    dialog.querySelector('[data-lb-prev]')!.addEventListener('click', () => show(current - 1));
+    dialog.querySelector('[data-lb-next]')!.addEventListener('click', () => show(current + 1));
+
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') show(current + 1);
+      if (e.key === 'ArrowLeft') show(current - 1);
+    });
+
+    // Klick auf den Hintergrund schliesst
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+  }
+</script>

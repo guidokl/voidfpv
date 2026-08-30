@@ -1,0 +1,71 @@
+[
+  {
+    "id": "haftpflicht",
+    "key": "vers",
+    "label": "Drohnen-Haftpflicht (DMO)",
+    "short": "VERS",
+    "state": "open",
+    "order": 1,
+    "costEur": "40–70 €/Jahr",
+    "url": "https://www.deutsche-modellsport-organisation.de/drohnenversicherung/private-drohnenversicherung",
+    "note": "Muss zuerst kommen — die LBA-Registrierung fragt die Versicherungsnummer ab. Über die DMFV-Kooperation kommt die 30-m-Regel für FPV ohne Spotter mit."
+  },
+  {
+    "id": "lba-registrierung",
+    "key": "eid",
+    "label": "LBA-Betreiberregistrierung → e-ID",
+    "short": "E-ID",
+    "state": "open",
+    "order": 2,
+    "costEur": "20 € einmalig",
+    "url": "https://uas-registration.lba-openuav.de",
+    "note": "Ergebnis ist die Betreibernummer. Sichtbarer Teil kommt als Aufkleber an die Drohne, der PIN-Zusatz bleibt geheim."
+  },
+  {
+    "id": "remote-id",
+    "key": "eid",
+    "label": "e-ID in DJI Fly eintragen (Remote ID)",
+    "short": "E-ID",
+    "state": "open",
+    "order": 3,
+    "note": "C1-Pflicht. Ohne diesen Schritt ist die Avata 2 formal nicht korrekt gekennzeichnet, auch wenn der Aufkleber klebt."
+  },
+  {
+    "id": "a1a3",
+    "key": "a1a3",
+    "label": "EU-Kompetenznachweis A1/A3",
+    "short": "A1/A3",
+    "state": "open",
+    "order": 4,
+    "costEur": "25 €",
+    "url": "https://lba-openuav.de",
+    "note": "40 Fragen, 75 % zum Bestehen, 5 Jahre gültig, EU-weit. Auch mit Verbandsregeln machen — bleibt gültig, wenn der Vertrag endet."
+  },
+  {
+    "id": "hw-avata",
+    "key": "hw",
+    "label": "DJI Avata 2 + Goggles 3",
+    "short": "HW",
+    "state": "pending",
+    "order": 5,
+    "note": "Bestellt, noch nicht geliefert."
+  },
+  {
+    "id": "hw-rc3",
+    "key": "hw",
+    "label": "FPV Remote Controller 3",
+    "short": "HW",
+    "state": "pending",
+    "order": 6,
+    "note": "Bestellt. Geht zuerst per USB an den PC in den Simulator, lange bevor er über ein Feld zeigt."
+  },
+  {
+    "id": "hw-sd",
+    "key": "hw",
+    "label": "microSD U3/V30 + Ersatzpropeller",
+    "short": "HW",
+    "state": "open",
+    "order": 7,
+    "note": "Beides vor dem ersten Waldakku besorgen, nicht danach."
+  }
+]

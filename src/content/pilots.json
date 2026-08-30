@@ -1,0 +1,140 @@
+[
+  {
+    "id": "johnny-fpv",
+    "name": "Johnny FPV",
+    "discipline": "cinematic",
+    "country": "US",
+    "order": 1,
+    "why": "Hat FPV aus der Hobby-Ecke in die Werbe- und Filmproduktion getragen. Seine Aufnahmen sind der Grund, warum heute jeder Autospot eine Drohne durch enge Lücken schickt — Tempo, Nähe und ein Schnitt, der nie stehenbleibt.",
+    "refs": ["Welcome to Paradise (2018)", "Drive2Extremes (2021)"],
+    "channelUrl": "https://www.youtube.com/@JohnnyFPV",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "mr-steele",
+    "name": "Mr Steele",
+    "discipline": "freestyle",
+    "country": "US",
+    "order": 2,
+    "why": "Der Maßstab für Freestyle. Flüssige, weiche Linien statt hektischer Tricks — wer verstehen will, was mit Throttle-Kontrolle gemeint ist, schaut sich seine Flüge im Zeitlupentempo an.",
+    "refs": ["Real Life Video Game / 1 LIFE (2019)"],
+    "channelUrl": "https://www.youtube.com/@MrSteeleFPV",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "botgrinder",
+    "name": "BOTGRINDER",
+    "discipline": "freestyle",
+    "order": 3,
+    "why": "Bando-Freestyle mit rauem, ehrlichem Stil und einem Kommentar, der Technik nebenbei erklärt. Zeigt vor allem, wie viel kaputtgeht, bevor eine Linie sitzt — ein nützliches Gegengewicht zu polierten Highlight-Reels.",
+    "refs": [],
+    "channelUrl": "https://www.youtube.com/@BOTGRINDER",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "le-drib",
+    "name": "Le Drib",
+    "discipline": "freestyle",
+    "order": 4,
+    "why": "Ruhiger, sehr präziser Freestyle mit ausgeprägtem Gefühl für Musik und Schnitt. Gute Referenz dafür, dass langsam geflogene Linien stärker wirken können als schnelle.",
+    "refs": [],
+    "channelUrl": "https://www.youtube.com/@ledribfpv",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "ummagawd",
+    "name": "ummagawd",
+    "discipline": "freestyle",
+    "order": 5,
+    "why": "Freestyle-Pilot und Frame-Entwickler zugleich. Interessant, weil bei ihm Fliegen und Bauen dasselbe Thema sind — genau die Richtung, in die es hier später gehen soll.",
+    "refs": [],
+    "channelUrl": "https://www.youtube.com/@UmmagawdFPV",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "skitzo",
+    "name": "Skitzo FPV",
+    "discipline": "freestyle",
+    "order": 6,
+    "why": "Aggressiver, kompromissloser Stil aus der frühen Freestyle-Ära. Historisch wichtig für das, was heute als Standardrepertoire gilt.",
+    "refs": [],
+    "channelUrl": "https://www.youtube.com/@SkitzoFPV",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "gab707",
+    "name": "Gab707",
+    "discipline": "racing",
+    "country": "CH",
+    "order": 7,
+    "why": "Schweizer Racer aus der Drone Racing League. Sehenswert wegen der Linienführung: im Racing zählt nicht der schnellste Abschnitt, sondern der, den man ohne Korrektur durchfliegt.",
+    "refs": [],
+    "channelUrl": "https://www.youtube.com/@Gab707",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "nurk",
+    "name": "NURK FPV",
+    "discipline": "racing",
+    "country": "US",
+    "order": 8,
+    "why": "Racer mit analytischem Zugang. Erklärt, warum eine Linie funktioniert, statt sie nur zu fliegen — nützlich, sobald es im Simulator um Wiederholbarkeit geht.",
+    "refs": [],
+    "channelUrl": "https://www.youtube.com/@NURKFPV",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "bardwell",
+    "name": "Joshua Bardwell",
+    "discipline": "education",
+    "country": "US",
+    "order": 9,
+    "why": "Der Erklärer der Szene. Lange, gründliche Videos zu Betaflight, Funkstrecken, Tuning und Fehlersuche. Für den Weg zum eigenen Build praktisch der wichtigste Kanal überhaupt.",
+    "refs": ["FlowState: The FPV Drone Documentary (2024)"],
+    "channelUrl": "https://www.youtube.com/@JoshuaBardwell",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "oscar-liang",
+    "name": "Oscar Liang",
+    "discipline": "education",
+    "country": "UK",
+    "order": 10,
+    "why": "Kein Videokanal, sondern die Referenzseite in Textform. Kaufberatung, Build-Anleitungen und Fehlerdiagnose — meist schneller gelesen als ein 40-Minuten-Video.",
+    "refs": [],
+    "channelUrl": "https://oscarliang.com",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "mads-tech",
+    "name": "Mads Tech",
+    "discipline": "education",
+    "order": 11,
+    "why": "Tests und Erklärvideos zu aktueller Hardware, inklusive DJI-Systemen. Brauchbar, um vor einem Kauf einzuschätzen, was eine Komponente wirklich leistet.",
+    "refs": [],
+    "channelUrl": "https://www.youtube.com/@MadsTech",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "rotor-riot",
+    "name": "Rotor Riot",
+    "discipline": "crew",
+    "country": "US",
+    "order": 12,
+    "why": "Crew-Kanal, der Freestyle früh einem größeren Publikum gezeigt hat. Mischung aus Fliegen, Technik und Community — gut, um ein Gefühl für die Szene zu bekommen.",
+    "refs": [],
+    "channelUrl": "https://www.youtube.com/@RotorRiot",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "drl",
+    "name": "Drone Racing League",
+    "discipline": "crew",
+    "country": "US",
+    "order": 13,
+    "why": "Die professionelle Rennserie. Für das eigene Fliegen kaum übertragbar, aber sie zeigt, wo die Obergrenze dessen liegt, was mit einem Quad möglich ist.",
+    "refs": [],
+    "channelUrl": "https://www.youtube.com/@thedroneracingleague",
+    "verified": "2026-08-30"
+  }
+]

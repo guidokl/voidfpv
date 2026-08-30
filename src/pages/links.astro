@@ -1,0 +1,128 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import DataMatrix, { type MatrixItem } from '~/components/DataMatrix.astro';
+import { href } from '~/lib/format';
+
+const CATEGORIES = [
+  { id: 'shop-de', label: 'Shops DE/EU' },
+  { id: 'shop-int', label: 'Shops International' },
+  { id: 'hersteller', label: 'Hersteller' },
+  { id: 'community', label: 'Community & Foren' },
+  { id: 'lernen', label: 'Lernen & Referenz' },
+  { id: 'behoerde', label: 'Behörden & Verbände' },
+];
+
+const links = await getCollection('links');
+
+const items: MatrixItem[] = links
+  .sort((a, b) => {
+    const ci = CATEGORIES.findIndex((c) => c.id === a.data.category)
+      - CATEGORIES.findIndex((c) => c.id === b.data.category);
+    return ci !== 0 ? ci : a.data.name.localeCompare(b.data.name, 'de');
+  })
+  .map((l) => ({
+    id: l.id,
+    name: l.data.name,
+    url: l.data.url,
+    category: l.data.category,
+    badges: [l.data.country],
+    meta: l.data.focus,
+    verdict: l.data.note ?? l.data.focus,
+    checked: l.data.lastChecked,
+  }));
+
+const intShops = links.filter((l) => l.data.category === 'shop-int').length;
+---
+
+<Base
+  title="Links"
+  description="Linkverzeichnis rund um FPV: Shops in Deutschland und der EU, internationale Shops, Hersteller, Communities und Foren, Lernquellen sowie Behörden und Verbände."
+  path="/links"
+>
+  <SectionHead
+    index="14"
+    title="Linkverzeichnis"
+    lead="Shops, Hersteller, Foren und Behörden an einer Stelle — mit einer Zeile dazu, wofür der Eintrag tatsächlich taugt. Jede Adresse wurde beim Eintragen aufgerufen."
+    meta={`${links.length} Einträge`}
+  />
+
+  <div class="cols">
+    <Panel label="Zoll und Einfuhr" meta={`${intShops} Shops außerhalb der EU`} tone="alert">
+      <p class="txt">
+        Bei Bestellungen außerhalb der EU kommen Einfuhrumsatzsteuer und je nach Warengruppe
+        Zoll obendrauf — in der Praxis oft 20 bis 30 Prozent über dem angezeigten Preis, dazu
+        eine Bearbeitungsgebühr des Zustellers.
+      </p>
+      <p class="txt">
+        Rechnet sich meist nur bei Teilen, die es hier nicht gibt. Für Propeller, Akkus und
+        Ersatzteile ist ein EU-Shop unterm Strich günstiger und schneller.
+      </p>
+      <p class="txt warn">
+        <strong>LiPo-Akkus</strong> sind Gefahrgut. Versand aus Übersee ist eingeschränkt und
+        teuer — die kauft man ohnehin im Inland.
+      </p>
+    </Panel>
+
+    <Panel label="Wo man wirklich Antworten bekommt">
+      <p class="txt">
+        Bei technischen Fragen zum Selbstbau lohnt die Reihenfolge: erst
+        <a href="https://oscarliang.com" target="_blank" rel="noopener noreferrer">Oscar Liang</a>
+        lesen, dann die offizielle Doku, dann fragen. Die meisten Anfängerfragen sind dort
+        gründlicher beantwortet, als es ein Forenthread je sein wird.
+      </p>
+      <p class="txt">
+        Bei <strong>deutschem Recht</strong> ist es umgekehrt: englischsprachige Communities
+        helfen nicht weiter. Dafür die deutschsprachigen Foren, die Verbände — und im Zweifel
+        <a href="https://maptool-dipul.dfs.de" target="_blank" rel="noopener noreferrer">dipul</a>
+        und das <a href="https://www.lba.de" target="_blank" rel="noopener noreferrer">LBA</a>
+        selbst.
+      </p>
+    </Panel>
+  </div>
+
+  <Panel label="Verzeichnis" meta="filtern und suchen">
+    <DataMatrix
+      items={items}
+      categories={CATEGORIES}
+      metaLabel="Schwerpunkt"
+      searchPlaceholder="Shop, Forum oder Stichwort suchen …"
+      checkedLabel="geprüft"
+    />
+  </Panel>
+
+  <Panel label="Pflege">
+    <p class="txt">
+      Neue Adresse aufnehmen: Eintrag in <code>src/content/links.json</code> ergänzen, URL vorher
+      im Browser öffnen und <code>lastChecked</code> auf das heutige Datum setzen. Tote Links
+      fliegen raus statt „ungefähr richtig“ stehenzubleiben — die Adressen der Szene ändern sich
+      häufiger als die Technik.
+    </p>
+    <p class="txt">
+      Passende Software steht getrennt davon unter <a href={href('/tools')}>Tools</a>.
+    </p>
+  </Panel>
+</Base>
+
+<style>
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s3);
+    margin-bottom: var(--s5);
+    align-items: start;
+  }
+  .txt {
+    font-size: var(--fs-small);
+    color: var(--muted);
+    max-width: 66ch;
+  }
+  .txt + .txt { margin-top: var(--s3); }
+  .warn { color: var(--text-dim); }
+
+  @media (max-width: 900px) {
+    .cols { grid-template-columns: 1fr; }
+  }
+</style>

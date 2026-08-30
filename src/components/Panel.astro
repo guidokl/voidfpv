@@ -1,0 +1,92 @@
+---
+/**
+ * Grundflaeche der Seite. Eckige Kante, Hairline-Rahmen, Ecken-Ticks
+ * statt Border-Radius. Optionaler Kopf mit Mono-Label und rechter Randnotiz.
+ */
+interface Props {
+  label?: string;
+  meta?: string;
+  /** Akzentfarbe des Rahmens für Status-Panels */
+  tone?: 'default' | 'accent' | 'ok' | 'alert';
+  /** Ohne Innenabstand, z. B. für Tabellen die bis an den Rand laufen */
+  flush?: boolean;
+  id?: string;
+  class?: string;
+}
+const { label, meta, tone = 'default', flush = false, id, class: cls = '' } = Astro.props;
+---
+
+<section class:list={['panel', `tone-${tone}`, flush && 'is-flush', cls]} id={id}>
+  <span class="tick tl" aria-hidden="true"></span>
+  <span class="tick tr" aria-hidden="true"></span>
+  <span class="tick bl" aria-hidden="true"></span>
+  <span class="tick br" aria-hidden="true"></span>
+
+  {
+    (label || meta) && (
+      <header class="panel-head">
+        {label && <span class="mono-label">{label}</span>}
+        {meta && <span class="panel-meta">{meta}</span>}
+      </header>
+    )
+  }
+
+  <div class="panel-body">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .panel {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    /* Kein Radius. Bewusst. */
+  }
+
+  .tone-accent { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+  .tone-ok     { border-color: color-mix(in srgb, var(--gps) 40%, var(--line)); }
+  .tone-alert  { border-color: color-mix(in srgb, var(--armed) 45%, var(--line)); }
+
+  /* Ecken-Ticks: 2px L-Winkel, sitzen leicht ausserhalb des Rahmens */
+  .tick {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border: 0 solid var(--line-strong);
+    pointer-events: none;
+  }
+  .tone-accent .tick { border-color: var(--accent); }
+  .tone-ok .tick     { border-color: var(--gps); }
+  .tone-alert .tick  { border-color: var(--armed); }
+
+  .tl { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; }
+  .tr { top: -1px; right: -1px; border-top-width: 2px; border-right-width: 2px; }
+  .bl { bottom: -1px; left: -1px; border-bottom-width: 2px; border-left-width: 2px; }
+  .br { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; }
+
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s4);
+    padding: var(--s3) var(--s5);
+    border-bottom: 1px solid var(--line);
+    background: var(--panel-sunk);
+  }
+  .panel-meta {
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--tr-mid);
+    color: var(--muted-deep);
+    white-space: nowrap;
+  }
+
+  .panel-body { padding: var(--s5); }
+  .is-flush .panel-body { padding: 0; }
+
+  @media (max-width: 600px) {
+    .panel-body { padding: var(--s4); }
+    .panel-head { padding: var(--s3) var(--s4); }
+  }
+</style>

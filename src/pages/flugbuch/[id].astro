@@ -1,0 +1,100 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import Panel from '~/components/Panel.astro';
+import SpecTable from '~/components/SpecTable.astro';
+import { href, fmtDate } from '~/lib/format';
+
+export const getStaticPaths = (async () => {
+  const flights = await getCollection('flights');
+  return flights.map((f) => ({ params: { id: f.id }, props: { entry: f } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+
+const MODE_LABEL = { N: 'Normal', S: 'Sport', M: 'Manual', 'Easy ACRO': 'Easy ACRO' };
+
+const specs: [string, string][] = [
+  ['Datum', fmtDate(d.date)],
+  ['Ort', d.spot],
+  ['Gebiet', d.area],
+  ['Fluggerät', d.drone],
+  ...(d.controller ? ([['Controller', d.controller]] as [string, string][]) : []),
+  ['Flugmodus', MODE_LABEL[d.mode]],
+  ['Akkus', String(d.packs)],
+  ['Flugzeit', `${Math.round(d.airtimeMin)} min`],
+  ...(d.maxAltM != null ? ([['Max. Höhe', `${d.maxAltM} m`]] as [string, string][]) : []),
+  ...(d.windMs != null ? ([['Wind', `${d.windMs} m/s`]] as [string, string][]) : []),
+  ...(d.tempC != null ? ([['Temperatur', `${d.tempC} °C`]] as [string, string][]) : []),
+  ...(d.conditions ? ([['Bedingungen', d.conditions]] as [string, string][]) : []),
+  ['Spotter', d.spotter ? 'ja' : 'nein'],
+  ['Crashes', String(d.crashes)],
+];
+---
+
+<Base
+  title={`${fmtDate(d.date)} · ${d.spot}`}
+  description={d.summary}
+  path="/flugbuch"
+  hideTabs
+>
+  {
+    d.template && (
+      <p class="tpl">
+        <span class="mono-label">Vorlage</span>
+        Dieser Eintrag ist ein Beispiel und zählt nicht in die Statistik.
+      </p>
+    )
+  }
+
+  <header class="head">
+    <a class="back mono-label" href={href('/flugbuch')}>&larr; Flugbuch</a>
+    <h1>{d.spot}</h1>
+    <p class="sum">{d.summary}</p>
+  </header>
+
+  <div class="body">
+    <div class="side">
+      <Panel label="Flugdaten">
+        <SpecTable rows={specs} dense highlight={['Flugzeit', 'Crashes']} />
+      </Panel>
+    </div>
+    <article class="prose">
+      <Content />
+    </article>
+  </div>
+</Base>
+
+<style>
+  .tpl {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s3);
+    padding: var(--s3) var(--s4);
+    margin-bottom: var(--s5);
+    border-left: 2px solid var(--accent);
+    background: var(--accent-wash);
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+  }
+  .head { margin-bottom: var(--s6); }
+  .back { display: inline-block; margin-bottom: var(--s4); border-bottom: none; color: var(--muted); }
+  .back:hover { color: var(--accent); }
+  h1 { font-size: var(--fs-h1); }
+  .sum { margin-top: var(--s3); max-width: 66ch; color: var(--muted); font-size: var(--fs-lead); line-height: var(--lh-snug); }
+
+  .body {
+    display: grid;
+    grid-template-columns: minmax(260px, 340px) 1fr;
+    gap: var(--s5);
+    align-items: start;
+  }
+  .prose { max-width: none; }
+
+  @media (max-width: 900px) {
+    .body { grid-template-columns: 1fr; }
+  }
+</style>

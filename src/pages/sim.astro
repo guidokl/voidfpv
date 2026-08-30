@@ -1,0 +1,294 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import StatTile from '~/components/StatTile.astro';
+import EmptyState from '~/components/EmptyState.astro';
+import { href, fmtDate, fmtDuration } from '~/lib/format';
+
+const ZIEL_MINUTEN = 15 * 60; // 15 h vor dem ersten echten Manual-Akku
+
+const sims = (await getCollection('sim')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+const echte = sims.filter((s) => !s.data.template);
+const minuten = echte.reduce((n, s) => n + s.data.minutes, 0);
+const fortschritt = Math.min(100, Math.round((minuten / ZIEL_MINUTEN) * 100));
+
+const simTools = (await getCollection('tools'))
+  .filter((t) => t.data.category === 'simulator')
+  .sort((a, b) => a.data.name.localeCompare(b.data.name, 'de'));
+
+const EIGNUNG: Record<string, string> = {
+  liftoff: 'sehr gut',
+  uncrashed: 'sehr gut',
+  velocidrone: 'gut, weniger cineastisch',
+  'tryp-fpv': 'gut zum Spaß',
+  'drl-sim': 'optional',
+  'split-fpv': 'testen',
+};
+
+const PLAN = [
+  {
+    n: '01',
+    title: 'Hover halten',
+    time: '2–3 h',
+    text: 'Auf der Stelle stehen, ohne zu driften. Klingt langweilig, ist die Grundlage für alles. Erst mit Selbstnivellierung, dann in Manual.',
+  },
+  {
+    n: '02',
+    title: 'Achten fliegen',
+    time: '3–4 h',
+    text: 'Zwei Kreise um zwei Punkte, in beide Richtungen. Zwingt zur Koordination von Roll, Yaw und Throttle statt nur geradeaus.',
+  },
+  {
+    n: '03',
+    title: 'Sinkflug-Kurven',
+    time: '3–4 h',
+    text: 'Kontrolliert Höhe abbauen, während die Drohne kurvt. Genau das, was im Wald zwischen Baumkronen und Boden passiert.',
+  },
+  {
+    n: '04',
+    title: 'Gaps',
+    time: '4–5 h',
+    text: 'Durch Lücken fliegen, erst breit, dann enger. Ab hier wird das Training endlich wieder interessant.',
+  },
+  {
+    n: '05',
+    title: 'Wiederholbarkeit',
+    time: 'laufend',
+    text: 'Eine Linie zweimal gleich fliegen. Wer das kann, ist bereit für den ersten echten Manual-Akku — vorher nicht.',
+  },
+];
+---
+
+<Base
+  title="Sim"
+  description="Simulator-Training für FPV: Vergleich der Steam-Simulatoren, Setup des FPV Remote Controller 3 am PC, Trainingsplan und Logbuch der Sessions."
+  path="/sim"
+>
+  <SectionHead
+    index="05"
+    title="Simulator"
+    lead="Der aktivste Teil des Einstiegs, solange die Drohne noch unterwegs ist. Jede Stunde hier kostet nichts außer Zeit — jede Stunde, die hier fehlt, kostet später Propeller."
+    meta={`${echte.length} Sessions · ${fmtDuration(minuten)}`}
+  />
+
+  <div class="tiles">
+    <StatTile
+      value={minuten === 0 ? '0' : fmtDuration(minuten)}
+      label="Trainingszeit"
+      tone={minuten > 0 ? 'accent' : 'idle'}
+    />
+    <StatTile value={echte.length} label="Sessions" tone="idle" />
+    <StatTile value={`${fortschritt}`} unit="%" label="Bis zum Ziel" tone={fortschritt >= 100 ? 'ok' : 'idle'} hint="Ziel: 15 h vor dem ersten Manual-Akku" />
+    <StatTile value="15–20" unit="h" label="Empfehlung" tone="default" hint="vor Acro im Wald" />
+  </div>
+
+  <section id="warum" class="anchor">
+    <Panel label="Warum überhaupt Simulator" meta="die kurze Begründung">
+      <div class="two">
+        <p class="txt">
+          Manual heißt: keine Selbstnivellierung, keine Höhenhaltung. Die Drohne bleibt genau so
+          schräg stehen, wie man sie gelassen hat. Das lässt sich nicht durch Lesen lernen und
+          nicht durch Vorsicht ersetzen — es braucht Wiederholung, und zwar viele.
+        </p>
+        <p class="txt">
+          Im Simulator kostet ein Crash nichts. Draußen kostet er 6 bis 12 € für Propeller, im
+          schlechten Fall 40 € für einen Kamerarahmen und eine abgebrochene Session. Deshalb
+          kommt der Controller vor der Drohne an den Rechner.
+        </p>
+      </div>
+      <p class="note">
+        Die DJI-App <strong>Virtual Flight</strong> am Handy vermittelt ein grobes Gefühl, hat aber
+        keinen echten Controller — als Acro-Training taugt sie nicht.
+      </p>
+    </Panel>
+  </section>
+
+  <section id="vergleich" class="anchor">
+    <Panel label="Simulatoren im Vergleich" meta="Stand August 2026" flush>
+      <div class="scroll-x">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Simulator</th>
+              <th>Preis</th>
+              <th>Stärken</th>
+              <th>Für Avata-Acro</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              simTools.map((t) => (
+                <tr>
+                  <td>
+                    <a href={t.data.url} target="_blank" rel="noopener noreferrer">{t.data.name}</a>
+                  </td>
+                  <td class="mono">{t.data.price}</td>
+                  <td class="verdict">{t.data.verdict}</td>
+                  <td class="fit">{EIGNUNG[t.id] ?? '—'}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </Panel>
+    <p class="rec">
+      <span class="mono-label">Empfehlung</span>
+      <strong>Uncrashed oder Liftoff</strong> zusammen mit dem FPV RC 3 per USB. Beide haben
+      Workshop-Inhalte, die dem Avata-Flugverhalten nahekommen.
+    </p>
+  </section>
+
+  <section id="setup" class="anchor">
+    <Panel label="Setup" meta="FPV Remote Controller 3 am PC">
+      <ol class="setup">
+        <li><span class="n">01</span><div><b>Controller per USB-C anschließen</b><span>Windows erkennt ihn als Eingabegerät. Vor dem Start des Simulators anstecken, sonst wird er nicht gefunden.</span></div></li>
+        <li><span class="n">02</span><div><b>Im Simulator kalibrieren</b><span>Alle Achsen einmal voll ausfahren. Prüfen, dass Throttle nicht invertiert ist — der häufigste Anfängerfehler.</span></div></li>
+        <li><span class="n">03</span><div><b>Rates grob an die Avata angleichen</b><span>Nicht die aggressivsten Werte wählen, nur weil sie im Sim gehen. Ziel ist Übertragbarkeit, nicht Höchstgeschwindigkeit.</span></div></li>
+        <li><span class="n">04</span><div><b>Sitzposition wie später draußen</b><span>Sitzend trainieren. Wer im Sim steht und draußen sitzt, verschenkt einen Teil des Muskelgedächtnisses.</span></div></li>
+        <li><span class="n">05</span><div><b>Kurze Einheiten</b><span>20 bis 30 Minuten konzentriert bringen mehr als zwei Stunden nebenbei. Danach eintragen, was hängengeblieben ist.</span></div></li>
+      </ol>
+      <p class="note">
+        Ein Gamepad funktioniert, überträgt aber deutlich schlechter. Wer den echten Sender
+        ohnehin besitzt, sollte ihn benutzen.
+      </p>
+    </Panel>
+  </section>
+
+  <section id="plan" class="anchor">
+    <Panel label="Trainingsplan" meta="in dieser Reihenfolge">
+      <ol class="plan">
+        {
+          PLAN.map((p) => (
+            <li>
+              <div class="p-head">
+                <span class="n">{p.n}</span>
+                <h3>{p.title}</h3>
+                <span class="mono-label">{p.time}</span>
+              </div>
+              <p>{p.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </Panel>
+  </section>
+
+  <section id="logbuch" class="anchor">
+    <Panel label="Sim-Logbuch" meta={`${echte.length} Sessions`}>
+      {
+        echte.length > 0 ? (
+          <div class="scroll-x">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Datum</th>
+                  <th>Simulator</th>
+                  <th>Dauer</th>
+                  <th>Fokus</th>
+                  <th>Notiz</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  echte.map((s) => (
+                    <tr>
+                      <td class="mono">{fmtDate(s.data.date)}</td>
+                      <td>{s.data.sim}</td>
+                      <td class="mono">{Math.round(s.data.minutes)} min</td>
+                      <td>{s.data.focus.join(' · ')}</td>
+                      <td class="verdict">{s.data.notes}</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <EmptyState
+            code="LOG 00"
+            title="Noch keine Session eingetragen"
+            reason="Der Controller ist bestellt. Sobald er da ist, wird hier jede Einheit erfasst — Datum, Simulator, Minuten und woran gearbeitet wurde. Die Summe läuft in die Rail links und auf die Startseite."
+            next="Eine Kopie von src/content/sim/_vorlage.md anlegen, umbenennen und template auf false setzen."
+          />
+        )
+      }
+    </Panel>
+  </section>
+
+  <Panel label="Weiter" tone="accent">
+    <div class="links">
+      <a class="btn" href={href('/tools')}>Alle Tools</a>
+      <a class="btn" href={`${href('/wissen')}#lernpfad`}>Lernpfad Phase 05</a>
+      <a class="btn" href={href('/hangar')}>Controller im Hangar</a>
+    </div>
+  </Panel>
+</Base>
+
+<style>
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--s3);
+    margin-bottom: var(--s5);
+  }
+  .anchor {
+    margin-bottom: var(--s5);
+    scroll-margin-top: calc(var(--topbar-h) + var(--tabbar-h) + var(--s4));
+  }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
+  .txt { font-size: var(--fs-small); color: var(--muted); }
+  .note {
+    margin-top: var(--s4);
+    padding: var(--s3) var(--s4);
+    background: var(--panel-sunk);
+    border-left: 2px solid var(--line-strong);
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+  }
+
+  .mono { font-family: var(--font-mono); font-size: var(--fs-micro); white-space: nowrap; }
+  .verdict { color: var(--muted); }
+  .fit { font-family: var(--font-mono); font-size: var(--fs-micro); color: var(--accent); white-space: nowrap; }
+
+  .rec {
+    margin-top: var(--s3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+  }
+
+  .setup, .plan { list-style: none; margin: 0; padding: 0; }
+  .setup li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--s4);
+    padding: var(--s3) 0;
+    border-bottom: 1px solid var(--line-faint);
+  }
+  .setup li:last-child { border-bottom: none; }
+  .setup b { font-size: var(--fs-small); display: block; }
+  .setup span:not(.n) { font-size: var(--fs-small); color: var(--muted); display: block; margin-top: 2px; }
+  .n { font-family: var(--font-mono); font-size: var(--fs-tiny); color: var(--accent); }
+
+  .plan li { padding: var(--s4) 0; border-bottom: 1px solid var(--line-faint); }
+  .plan li:last-child { border-bottom: none; }
+  .p-head { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; }
+  .p-head h3 { font-size: var(--fs-body); }
+  .p-head .mono-label { margin-left: auto; }
+  .plan p { margin-top: var(--s2); font-size: var(--fs-small); color: var(--muted); max-width: 74ch; }
+
+  .links { display: flex; flex-wrap: wrap; gap: var(--s3); }
+
+  @media (max-width: 820px) {
+    .two { grid-template-columns: 1fr; gap: var(--s3); }
+    .p-head .mono-label { margin-left: 0; }
+  }
+</style>

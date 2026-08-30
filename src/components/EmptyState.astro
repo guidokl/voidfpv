@@ -1,0 +1,64 @@
+---
+/**
+ * Kein "hier ist noch nichts" — sondern ein erklärter Zustand.
+ * Sagt, warum leer, was fehlt und was als nächstes passiert.
+ */
+interface Props {
+  code: string;
+  title: string;
+  reason: string;
+  next?: string;
+}
+const { code, title, reason, next } = Astro.props;
+---
+
+<div class="empty">
+  <span class="tick tl" aria-hidden="true"></span>
+  <span class="tick br" aria-hidden="true"></span>
+
+  <div class="code mono-label">{code}</div>
+  <h3>{title}</h3>
+  <p class="reason">{reason}</p>
+  {next && <p class="next"><span class="mono-label">Nächster Schritt</span>{next}</p>}
+  <slot />
+</div>
+
+<style>
+  .empty {
+    position: relative;
+    padding: var(--s7) var(--s5);
+    border: 1px dashed var(--line-strong);
+    background:
+      repeating-linear-gradient(
+        135deg,
+        transparent 0 10px,
+        rgba(255, 255, 255, 0.012) 10px 20px
+      );
+    text-align: center;
+  }
+  .tick {
+    position: absolute;
+    width: 8px; height: 8px;
+    border: 0 solid var(--accent);
+  }
+  .tl { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; }
+  .br { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; }
+
+  .code { color: var(--accent); }
+  h3 { margin-top: var(--s3); font-size: var(--fs-h3); }
+  .reason {
+    margin: var(--s3) auto 0;
+    max-width: 52ch;
+    color: var(--muted);
+    font-size: var(--fs-small);
+  }
+  .next {
+    margin: var(--s5) auto 0;
+    max-width: 52ch;
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+  }
+</style>

@@ -1,0 +1,291 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import StatusLed from '~/components/StatusLed.astro';
+import StatTile from '~/components/StatTile.astro';
+import { href } from '~/lib/format';
+
+const steps = (await getCollection('status')).sort((a, b) => a.data.order - b.data.order);
+const done = steps.filter((s) => s.data.state === 'done').length;
+
+const VERBAENDE = [
+  {
+    name: 'DMO',
+    long: 'Deutsche Modellsport Organisation',
+    vereinsleben: 'keines',
+    fpv30: 'ja (über DMFV)',
+    aufwand: 'nur Police',
+    preis: 'ab ca. 39,96 €/Jahr (3 Mio.)',
+    empfehlung: true,
+  },
+  {
+    name: 'MFSD',
+    long: 'Tarif „Maverick"',
+    vereinsleben: 'keines nötig',
+    fpv30: 'ja',
+    aufwand: 'Online-Mitglied',
+    preis: 'ca. 59 €/Jahr inkl. 12 Mio.',
+    empfehlung: false,
+  },
+  {
+    name: 'DMFV',
+    long: 'Einzelmitgliedschaft',
+    vereinsleben: 'keines als Einzelmitglied',
+    fpv30: 'ja',
+    aufwand: 'Antrag + Tarif',
+    preis: 'je nach Tarif',
+    empfehlung: false,
+  },
+];
+---
+
+<Base
+  title="Papierkram"
+  description="Reihenfolge und Stand der Formalitäten: Drohnen-Haftpflicht, LBA-Registrierung, e-ID, Remote-ID und A1/A3-Kompetenznachweis."
+  path="/papierkram"
+>
+  <SectionHead
+    index="12"
+    title="Papierkram"
+    lead="Vier Schritte, eine feste Reihenfolge. Die LBA-Registrierung fragt die Versicherungsnummer ab — wer mit dem Kompetenznachweis anfängt, wartet am Ende trotzdem auf die Police."
+    meta={`${done} von ${steps.length} erledigt`}
+  />
+
+  <div class="tiles">
+    <StatTile
+      value={`${done}/${steps.length}`}
+      label="Erledigt"
+      tone={done === steps.length ? 'ok' : 'alert'}
+    />
+    <StatTile value="85–115" unit="€" label="Kosten erstes Jahr" tone="default" hint="Pflichtteil ohne Care Refresh" />
+    <StatTile value="5" unit="Jahre" label="A1/A3 gültig" tone="default" hint="EU-weit, bleibt auch ohne Verband gültig" />
+    <StatTile value="30" unit="m" label="FPV ohne Spotter" tone="accent" hint="nur mit Verbandsregeln" />
+  </div>
+
+  <Panel label="Ablauf" meta="Reihenfolge einhalten" flush>
+    <ol class="flow">
+      {
+        steps.map((s, i) => (
+          <li class={`fl s-${s.data.state}`}>
+            <div class="fl-n">
+              <span class="n">{String(i + 1).padStart(2, '0')}</span>
+            </div>
+            <div class="fl-body">
+              <div class="fl-head">
+                <h3>{s.data.label}</h3>
+                <StatusLed state={s.data.state} />
+              </div>
+              <p>{s.data.note}</p>
+              <div class="fl-meta">
+                {s.data.costEur && <span class="mono-label">{s.data.costEur}</span>}
+                {s.data.url && (
+                  <a href={s.data.url} target="_blank" rel="noopener noreferrer">
+                    {new URL(s.data.url).hostname}
+                  </a>
+                )}
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </Panel>
+
+  <div class="cols">
+    <Panel label="Verband ohne Vereinsabend" meta="Vergleich">
+      <div class="scroll-x">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Weg</th>
+              <th>Vereinsleben</th>
+              <th>FPV &lt; 30 m ohne Spotter</th>
+              <th>Aufwand</th>
+              <th>Preis</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              VERBAENDE.map((v) => (
+                <tr class={v.empfehlung ? 'is-rec' : ''}>
+                  <td>
+                    <b>{v.name}</b>
+                    <span class="sub">{v.long}</span>
+                  </td>
+                  <td>{v.vereinsleben}</td>
+                  <td>{v.fpv30}</td>
+                  <td>{v.aufwand}</td>
+                  <td>{v.preis}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="foot-note">
+        Ohne einen dieser Wege gilt der Open-Standard: <strong>jede</strong> FPV-Session mit
+        Spotter. Die DMO wirbt damit, dass unter Verbandsregeln in Deutschland unter 2 kg kein
+        A1/A3 nötig sei — trotzdem machen. 25 €, eine Stunde, fünf Jahre gültig, EU-weit, und
+        er bleibt bestehen, wenn der Vertrag endet.
+      </p>
+    </Panel>
+
+    <Panel label="Was nicht auf dieser Seite steht" tone="alert">
+      <p class="privacy">
+        Diese Seite zeigt bewusst nur <em>offen</em>, <em>läuft</em> oder <em>erledigt</em>.
+      </p>
+      <ul class="no-list">
+        <li>keine e-ID und kein PIN-Zusatz</li>
+        <li>keine Versicherungs- oder Vertragsnummer</li>
+        <li>keine Ausweisdaten</li>
+        <li>keine Scans oder Bescheide</li>
+      </ul>
+      <p class="privacy">
+        Das Repository ist öffentlich. Die Dokumente in <code>MyDocs/</code> sind deshalb per
+        <code>.gitignore</code> ausgeschlossen — sie liegen lokal, nicht auf GitHub.
+      </p>
+    </Panel>
+  </div>
+
+  <Panel label="Vor jedem Flug" meta="Kurzfassung">
+    <ul class="pre">
+      <li>dipul oder DrohnenAtlas: kein Naturschutz, kein Flugplatzkreis, Höhe okay</li>
+      <li>Wind und Böen prüfen — <a href={href('/wetter')}>Briefing</a></li>
+      <li>FPV: unter 30 m mit Verbandsregeln, darüber immer Spotter</li>
+      <li>Lost Places nur mit Erlaubnis des Eigentümers</li>
+      <li>Akkus, Props, Gimbal-Schutz — <a href={href('/checklisten')}>volle Liste</a></li>
+    </ul>
+  </Panel>
+</Base>
+
+<style>
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--s3);
+    margin-bottom: var(--s5);
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: var(--s3);
+    margin: var(--s5) 0;
+    align-items: start;
+  }
+
+  .flow { list-style: none; margin: 0; padding: 0; }
+  .fl {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    border-bottom: 1px solid var(--line);
+  }
+  .fl:last-child { border-bottom: none; }
+
+  .fl-n {
+    display: flex;
+    justify-content: center;
+    padding-top: var(--s5);
+    border-right: 1px solid var(--line);
+    background: var(--panel-sunk);
+  }
+  .n {
+    font-family: var(--font-mono);
+    font-size: var(--fs-tiny);
+    color: var(--muted-deep);
+  }
+  .s-open .n { color: var(--armed); }
+  .s-pending .n { color: var(--accent); }
+  .s-done .n { color: var(--gps); }
+
+  .fl-body { padding: var(--s4) var(--s5); }
+  .fl-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s4);
+  }
+  .fl-body h3 { font-size: var(--fs-body); }
+  .fl-body p {
+    margin-top: var(--s2);
+    max-width: 70ch;
+    font-size: var(--fs-small);
+    color: var(--muted);
+  }
+  .fl-meta {
+    margin-top: var(--s3);
+    display: flex;
+    gap: var(--s4);
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: var(--fs-micro);
+    font-family: var(--font-mono);
+  }
+
+  .sub {
+    display: block;
+    font-size: var(--fs-micro);
+    color: var(--muted-deep);
+    font-family: var(--font-mono);
+  }
+  tr.is-rec td { background: var(--accent-wash); }
+  tr.is-rec b { color: var(--accent); }
+
+  .foot-note {
+    margin-top: var(--s4);
+    font-size: var(--fs-small);
+    color: var(--muted);
+    max-width: 72ch;
+  }
+
+  .privacy { font-size: var(--fs-small); color: var(--muted); }
+  .no-list {
+    margin: var(--s4) 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--tr-mid);
+    text-transform: uppercase;
+  }
+  .no-list li {
+    padding: var(--s2) 0 var(--s2) var(--s4);
+    position: relative;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--line-faint);
+  }
+  .no-list li::before {
+    content: '×';
+    position: absolute;
+    left: 0;
+    color: var(--armed);
+  }
+
+  .pre { list-style: none; margin: 0; padding: 0; }
+  .pre li {
+    padding: var(--s2) 0 var(--s2) var(--s5);
+    position: relative;
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--line-faint);
+  }
+  .pre li:last-child { border-bottom: none; }
+  .pre li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1.05em;
+    width: 12px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  @media (max-width: 900px) {
+    .cols { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .fl { grid-template-columns: 40px 1fr; }
+    .fl-body { padding: var(--s4); }
+  }
+</style>

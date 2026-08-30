@@ -1,0 +1,145 @@
+---
+import { GLOSSARY } from '~/data/glossary';
+
+const groups = [
+  { id: 'alle', label: 'Alle' },
+  { id: 'fliegen', label: 'Fliegen' },
+  { id: 'technik', label: 'Technik' },
+  { id: 'recht', label: 'Recht' },
+];
+const terms = [...GLOSSARY].sort((a, b) => a.term.localeCompare(b.term, 'de'));
+---
+
+<div class="glossary" data-glossary>
+  <div class="controls">
+    <label class="search">
+      <span class="sr-only">Begriffe durchsuchen</span>
+      <input type="search" placeholder="Begriff suchen …" data-q autocomplete="off" />
+    </label>
+    <div class="filters" role="group" aria-label="Nach Bereich filtern">
+      {
+        groups.map((g, i) => (
+          <button class="btn" type="button" data-group={g.id} aria-pressed={i === 0 ? 'true' : 'false'}>
+            {g.label}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <p class="count mono-label" data-count>{terms.length} Begriffe</p>
+
+  <dl class="terms">
+    {
+      terms.map((t) => (
+        <div class="term" data-group={t.group} data-text={`${t.term} ${t.def}`.toLowerCase()}>
+          <dt>
+            {t.term}
+            <span class="badge">{t.group}</span>
+          </dt>
+          <dd>{t.def}</dd>
+        </div>
+      ))
+    }
+  </dl>
+
+  <p class="empty mono-label" data-empty hidden>Kein Treffer</p>
+</div>
+
+<style>
+  .controls {
+    display: flex;
+    gap: var(--s3);
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: var(--s4);
+  }
+  .search { flex: 1 1 220px; }
+  input[type='search'] {
+    width: 100%;
+    padding: var(--s2) var(--s3);
+    background: var(--panel-sunk);
+    border: 1px solid var(--line-strong);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+  }
+  input[type='search']::placeholder { color: var(--muted-deep); }
+  input[type='search']:focus { border-color: var(--accent); outline: none; }
+
+  .filters { display: flex; gap: -1px; }
+  .filters .btn + .btn { margin-left: -1px; }
+
+  .count { display: block; margin-bottom: var(--s3); color: var(--muted-deep); }
+
+  .terms { border-top: 1px solid var(--line); }
+  .term {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--s5);
+    padding: var(--s3) 0;
+    border-bottom: 1px solid var(--line-faint);
+  }
+  .term[hidden] { display: none; }
+
+  dt {
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    font-weight: 500;
+    color: var(--accent);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+  }
+  .badge {
+    font-size: 0.625rem;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    color: var(--muted-deep);
+  }
+  dd { font-size: var(--fs-small); color: var(--text-dim); }
+
+  .empty { padding: var(--s6) 0; text-align: center; }
+
+  @media (max-width: 700px) {
+    .term { grid-template-columns: 1fr; gap: var(--s2); }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-glossary]');
+  if (root) {
+    const q = root.querySelector<HTMLInputElement>('[data-q]')!;
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-group]'));
+    const terms = Array.from(root.querySelectorAll<HTMLElement>('.term'));
+    const count = root.querySelector<HTMLElement>('[data-count]')!;
+    const empty = root.querySelector<HTMLElement>('[data-empty]')!;
+
+    let group = 'alle';
+
+    const apply = () => {
+      const needle = q.value.trim().toLowerCase();
+      let visible = 0;
+      for (const t of terms) {
+        const okGroup = group === 'alle' || t.dataset.group === group;
+        const okText = !needle || (t.dataset.text ?? '').includes(needle);
+        const show = okGroup && okText;
+        t.hidden = !show;
+        if (show) visible++;
+      }
+      count.textContent = `${visible} ${visible === 1 ? 'Begriff' : 'Begriffe'}`;
+      empty.hidden = visible > 0;
+    };
+
+    q.addEventListener('input', apply);
+    for (const b of buttons) {
+      b.addEventListener('click', () => {
+        group = b.dataset.group!;
+        for (const other of buttons) {
+          other.setAttribute('aria-pressed', String(other === b));
+        }
+        apply();
+      });
+    }
+  }
+</script>

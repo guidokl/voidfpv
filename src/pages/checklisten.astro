@@ -1,0 +1,77 @@
+---
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import Checklist from '~/components/Checklist.astro';
+import { CHECKLISTS, FAILSAFE } from '~/data/checklists';
+
+const tabs = [
+  ...CHECKLISTS.map((c) => ({ label: c.title, href: `#${c.id}` })),
+  { label: 'Failsafe', href: '#failsafe' },
+];
+---
+
+<Base
+  title="Checklisten"
+  description="Abhakbare Checklisten für den FPV-Alltag: einmalige Formalitäten, Pre-Flight, Packliste, Einschaltreihenfolge, Wartung und eine Failsafe-Karte."
+  path="/checklisten"
+  tabs={tabs}
+>
+  <SectionHead
+    index="06"
+    title="Checklisten"
+    lead="Abhaken statt erinnern. Der Stand bleibt im Browser gespeichert — auf diesem Gerät, ohne Konto, ohne Server."
+    meta={`${CHECKLISTS.length} Listen`}
+  />
+
+  <div class="lists">
+    {CHECKLISTS.map((list) => <Checklist list={list} />)}
+  </div>
+
+  <section id="failsafe" class="failsafe-wrap">
+    <Panel label="Failsafe-Karte" meta="zum Nachschlagen, nicht zum Abhaken" tone="alert" flush>
+      <div class="scroll-x">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Situation</th>
+              <th>Reaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              FAILSAFE.map((f) => (
+                <tr>
+                  <td class="sit">{f.situation}</td>
+                  <td>{f.action}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </Panel>
+  </section>
+
+  <Panel label="Hinweis zum Speicher">
+    <p class="note">
+      Der Stand liegt im <code>localStorage</code> dieses Browsers. Er wandert nicht auf
+      andere Geräte, wird nicht übertragen und ist im privaten Fenster oder nach dem Löschen
+      der Website-Daten wieder leer. Wenn der Browser das Speichern blockiert, funktionieren
+      die Listen trotzdem — sie merken sich dann nichts.
+    </p>
+  </Panel>
+</Base>
+
+<style>
+  .lists { display: grid; gap: var(--s5); }
+  .lists > :global(.cl) {
+    scroll-margin-top: calc(var(--topbar-h) + var(--tabbar-h) + var(--s4));
+  }
+  .failsafe-wrap {
+    margin: var(--s5) 0;
+    scroll-margin-top: calc(var(--topbar-h) + var(--tabbar-h) + var(--s4));
+  }
+  .sit { font-family: var(--font-mono); font-size: var(--fs-micro); color: var(--armed); white-space: nowrap; }
+  .note { font-size: var(--fs-small); color: var(--muted); max-width: 72ch; }
+</style>

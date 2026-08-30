@@ -1,0 +1,198 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import DataMatrix, { type MatrixItem } from '~/components/DataMatrix.astro';
+import { href } from '~/lib/format';
+
+const CATEGORIES = [
+  { id: 'pflicht', label: 'Pflicht DE' },
+  { id: 'wetter', label: 'Wetter & Luftraum' },
+  { id: 'simulator', label: 'Simulator' },
+  { id: 'video', label: 'Video-Workflow' },
+  { id: 'flugdaten', label: 'Flugdaten' },
+  { id: 'recherche', label: 'Spot-Recherche' },
+  { id: 'werkstatt', label: 'Werkstatt' },
+  { id: 'archiv', label: 'Medien & Archiv' },
+];
+
+const STATUS_TONE = {
+  nutze: { label: 'nutze ich', tone: 'ok' as const },
+  geplant: { label: 'geplant', tone: 'accent' as const },
+  geprueft: { label: 'geprüft', tone: 'muted' as const },
+  verworfen: { label: 'verworfen', tone: 'alert' as const },
+};
+
+const tools = await getCollection('tools');
+
+const items: MatrixItem[] = tools
+  .sort((a, b) => {
+    const ci = CATEGORIES.findIndex((c) => c.id === a.data.category)
+      - CATEGORIES.findIndex((c) => c.id === b.data.category);
+    return ci !== 0 ? ci : a.data.name.localeCompare(b.data.name, 'de');
+  })
+  .map((t) => ({
+    id: t.id,
+    name: t.data.name,
+    url: t.data.url,
+    category: t.data.category,
+    badges: t.data.platform,
+    meta: t.data.price,
+    status: STATUS_TONE[t.data.status],
+    verdict: t.data.verdict,
+    checked: t.data.lastChecked,
+  }));
+
+// „Mein Setup“: was tatsaechlich installiert ist oder als Naechstes installiert wird
+const meins = tools.filter((t) => t.data.status === 'nutze' || t.data.status === 'geplant');
+const minimal = ['dji-fly', 'dipul', 'uav-forecast'];
+---
+
+<Base
+  title="Tools"
+  description="PC-Programme und Apps rund um FPV: Pflicht-Apps für Deutschland, Wetter und Luftraum, Simulatoren, Video-Workflow, Flugdatenanalyse, Spot-Recherche und Werkstatt-Software."
+  path="/tools"
+>
+  <SectionHead
+    index="04"
+    title="Tools & Apps"
+    lead="Kein Linkfriedhof, sondern eine Einschätzung pro Eintrag: wofür das Programm taugt, wofür nicht und ob es hier wirklich im Einsatz ist. Filterbar nach Bereich, durchsuchbar über Name und Text."
+    meta={`${tools.length} Einträge`}
+  />
+
+  <div class="cols">
+    <Panel label="Mein Setup" meta="Realität, nicht Wunschliste" tone="accent">
+      <p class="lead-txt">
+        Die Matrix unten ist Referenz. Das hier ist der tatsächliche Stand — installiert oder
+        als Nächstes dran.
+      </p>
+      <ul class="mine">
+        {
+          meins.map((t) => (
+            <li>
+              <span class={`dot ${t.data.status === 'nutze' ? 'on' : 'soon'}`} aria-hidden="true" />
+              <a href={`#${t.id}`} class="mine-name">{t.data.name}</a>
+              <span class="mine-state mono-label">
+                {t.data.status === 'nutze' ? 'im Einsatz' : 'geplant'}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </Panel>
+
+    <Panel label="Minimalset" meta="wenn es schnell gehen muss">
+      <p class="lead-txt">
+        Wer nur drei Dinge installiert, installiert diese. Alles andere ist Komfort oder kommt
+        später mit dem ersten eigenen Build.
+      </p>
+      <ol class="minimal">
+        {
+          minimal.map((id, i) => {
+            const t = tools.find((x) => x.id === id)!;
+            return (
+              <li>
+                <span class="n">{String(i + 1).padStart(2, '0')}</span>
+                <div>
+                  <a href={t.data.url} target="_blank" rel="noopener noreferrer">{t.data.name}</a>
+                  <span class="why">{t.data.verdict.split('.')[0]}.</span>
+                </div>
+              </li>
+            );
+          })
+        }
+      </ol>
+      <p class="foot-note">
+        Dazu der Blick ins <a href={href('/wetter')}>eigene Briefing</a> und in
+        <a href="https://maptool-dipul.dfs.de" target="_blank" rel="noopener noreferrer">dipul</a>.
+      </p>
+    </Panel>
+  </div>
+
+  <Panel label="Alle Tools" meta="filtern und suchen">
+    <DataMatrix
+      items={items}
+      categories={CATEGORIES}
+      metaLabel="Preis"
+      searchPlaceholder="Tool, Plattform oder Stichwort suchen …"
+    />
+  </Panel>
+
+  <Panel label="Hinweis">
+    <p class="foot-note">
+      Preise sind Anhaltspunkte, keine Angebote — Simulatoren wechseln im Sale ständig den
+      Preis. Jeder Link wurde beim Eintragen aufgerufen; das Datum steht an der jeweiligen
+      Zeile. Fehlt etwas oder stimmt eine Einschätzung nicht mehr, gehört das in
+      <code>src/content/tools.json</code>.
+    </p>
+  </Panel>
+</Base>
+
+<style>
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s3);
+    margin-bottom: var(--s5);
+    align-items: start;
+  }
+  .lead-txt {
+    font-size: var(--fs-small);
+    color: var(--muted);
+    max-width: 60ch;
+  }
+
+  .mine { list-style: none; margin: var(--s4) 0 0; padding: 0; }
+  .mine li {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--s3);
+    padding: var(--s2) 0;
+    border-bottom: 1px solid var(--line-faint);
+  }
+  .dot { width: 6px; height: 6px; }
+  .dot.on { background: var(--gps); }
+  .dot.soon { background: var(--accent); }
+  .mine-name {
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+    border-bottom-color: transparent;
+  }
+  .mine-name:hover { color: var(--accent); }
+  .mine-state { color: var(--muted-deep); }
+
+  .minimal { list-style: none; margin: var(--s4) 0 0; padding: 0; }
+  .minimal li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--s3);
+    padding: var(--s3) 0;
+    border-bottom: 1px solid var(--line-faint);
+  }
+  .minimal .n {
+    font-family: var(--font-mono);
+    font-size: var(--fs-tiny);
+    color: var(--accent);
+  }
+  .minimal a { font-family: var(--font-mono); font-size: var(--fs-small); }
+  .why {
+    display: block;
+    margin-top: 2px;
+    font-size: var(--fs-small);
+    color: var(--muted);
+  }
+
+  .foot-note {
+    margin-top: var(--s4);
+    font-size: var(--fs-small);
+    color: var(--muted);
+    max-width: 74ch;
+  }
+
+  @media (max-width: 900px) {
+    .cols { grid-template-columns: 1fr; }
+  }
+</style>

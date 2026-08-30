@@ -1,0 +1,292 @@
+[
+  {
+    "id": "fpv24",
+    "name": "FPV24",
+    "category": "shop-de",
+    "country": "DE",
+    "focus": "FPV-Vollsortiment, Ersatzteile, DJI",
+    "note": "Deutscher Versand, deutschsprachiger Support — für Verbrauchsmaterial wie Props der kurze Weg.",
+    "url": "https://www.fpv24.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "drone-fpv-racer",
+    "name": "Drone FPV Racer",
+    "category": "shop-de",
+    "country": "FR / EU",
+    "focus": "Racing- und Freestyle-Teile, Fertigmodelle",
+    "note": "Versand innerhalb der EU, kein Zoll. Gute Auswahl an Frames und Antrieben.",
+    "url": "https://www.drone-fpv-racer.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "lindinger",
+    "name": "Modellbau Lindinger",
+    "category": "shop-de",
+    "country": "AT / EU",
+    "focus": "Modellbau breit, Akkus, Ladetechnik",
+    "note": "Kein reiner FPV-Shop, aber stark bei LiPo, Ladegeräten und Werkstattzubehör.",
+    "url": "https://www.lindinger.at",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "getfpv",
+    "name": "GetFPV",
+    "category": "shop-int",
+    "country": "US",
+    "focus": "Sehr breites FPV-Sortiment",
+    "note": "Bei Bestellung aus der EU Einfuhrumsatzsteuer und ggf. Zoll einrechnen — häufig sind es 20–30 % obendrauf.",
+    "url": "https://www.getfpv.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "racedayquads",
+    "name": "RaceDayQuads",
+    "category": "shop-int",
+    "country": "US",
+    "focus": "Racing, Freestyle, Verbrauchsmaterial",
+    "note": "Gleiche Zoll-Rechnung wie bei GetFPV. Lohnt eher für Teile, die es in der EU nicht gibt.",
+    "url": "https://www.racedayquads.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "pyrodrone",
+    "name": "Pyrodrone",
+    "category": "shop-int",
+    "country": "US",
+    "focus": "Frames, Antriebe, Custom-Builds",
+    "note": "Interessant für Spezialteile beim eigenen Build. Zoll beachten.",
+    "url": "https://pyrodrone.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "dji-official",
+    "name": "DJI",
+    "category": "hersteller",
+    "country": "CN / global",
+    "focus": "Avata 2, Goggles 3, O4 Air Unit, Care Refresh",
+    "note": "Firmware, Handbücher und Ersatzteile aus erster Hand. Auch die Quelle für die D-Log-M-LUT.",
+    "url": "https://www.dji.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "iflight",
+    "name": "iFlight",
+    "category": "hersteller",
+    "country": "CN",
+    "focus": "Nazgul-Serie, Frames, BNF-Modelle",
+    "note": "Der Hersteller hinter den Fertigmodellen, die als nächster Schritt nach der Avata infrage kommen — teils mit vorinstalliertem DJI-Air-Unit.",
+    "url": "https://www.iflight.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "team-blacksheep",
+    "name": "Team BlackSheep",
+    "category": "hersteller",
+    "country": "CH",
+    "focus": "Funkstrecken, Antennen, Zubehör",
+    "note": "Schweizer Hersteller mit EU-Versand. Crossfire und Antennen sind seit Jahren Referenz.",
+    "url": "https://www.team-blacksheep.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "betafpv",
+    "name": "BetaFPV",
+    "category": "hersteller",
+    "country": "CN",
+    "focus": "Tiny Whoops, Einsteigermodelle, Zubehör",
+    "note": "Kleine Innenraum-Quads als günstige Übungsgeräte — deutlich billiger zu crashen als eine Avata.",
+    "url": "https://betafpv.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "speedybee",
+    "name": "SpeedyBee",
+    "category": "hersteller",
+    "country": "CN",
+    "focus": "Flight Controller, Stacks, App",
+    "note": "Weit verbreitete Elektronik für eigene Builds, mit Konfiguration per Handy-App.",
+    "url": "https://www.speedybee.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "foxeer",
+    "name": "Foxeer",
+    "category": "hersteller",
+    "country": "CN",
+    "focus": "Kameras, VTX, Antennen",
+    "note": "Standardadresse für analoge und digitale Kameratechnik im Selbstbau.",
+    "url": "https://www.foxeer.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "runcam",
+    "name": "RunCam",
+    "category": "hersteller",
+    "country": "CN",
+    "focus": "FPV-Kameras, Action-Cams",
+    "note": "Neben Foxeer der zweite große Name bei Kameras — auch für Gyroflow-taugliche Aufnahmen.",
+    "url": "https://www.runcam.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "oscarliang",
+    "name": "Oscar Liang",
+    "category": "lernen",
+    "country": "UK",
+    "focus": "Die Referenzseite für FPV-Technik",
+    "note": "Kaufberatung, Build-Anleitungen, Betaflight-Erklärungen, Fehlersuche. Wenn eine Frage zu eigenen Builds auftaucht, steht die Antwort meist hier.",
+    "url": "https://oscarliang.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "bardwell",
+    "name": "Joshua Bardwell",
+    "category": "lernen",
+    "country": "US",
+    "focus": "Video-Tutorials, Tuning, Fehlersuche",
+    "note": "Der Erklärer der Szene. Lange, gründliche Videos zu genau den Themen, an denen Anfänger hängenbleiben.",
+    "url": "https://www.youtube.com/@JoshuaBardwell",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "betaflight-docs",
+    "name": "Betaflight Dokumentation",
+    "category": "lernen",
+    "country": "global",
+    "focus": "Offizielle Doku zur Flugsoftware",
+    "note": "Erst mit eigenem Build relevant, dann aber die Primärquelle statt zusammengesuchter Forenbeiträge.",
+    "url": "https://betaflight.com/docs/wiki",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "rotorbuilds",
+    "name": "RotorBuilds",
+    "category": "lernen",
+    "country": "global",
+    "focus": "Fertige Build-Listen anderer Piloten",
+    "note": "Wer ein 5\" plant, findet hier durchgerechnete Teilelisten inklusive Erfahrungsberichten — spart teure Fehlkäufe.",
+    "url": "https://rotorbuilds.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "intofpv",
+    "name": "IntoFPV Forum",
+    "category": "community",
+    "country": "EN",
+    "focus": "Englischsprachiges FPV-Forum",
+    "note": "Ruhiger und hilfsbereiter als die meisten Chat-Kanäle. Gut für ausführliche Fragen zum Selbstbau.",
+    "url": "https://intofpv.com",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "reddit-fpv",
+    "name": "r/fpv",
+    "category": "community",
+    "country": "EN",
+    "focus": "Größte FPV-Community auf Reddit",
+    "note": "Schnelle Antworten, viel Freestyle und Selbstbau. Für Kaufberatung brauchbar, für Rechtsfragen zu Deutschland nicht.",
+    "url": "https://www.reddit.com/r/fpv/",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "reddit-multicopter",
+    "name": "r/Multicopter",
+    "category": "community",
+    "country": "EN",
+    "focus": "Technik, Builds, Reparaturen",
+    "note": "Technischer als r/fpv, gute Anlaufstelle bei konkreten Hardware-Problemen.",
+    "url": "https://www.reddit.com/r/Multicopter/",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "reddit-dji",
+    "name": "r/dji",
+    "category": "community",
+    "country": "EN",
+    "focus": "DJI-Ökosystem, Firmware, Probleme",
+    "note": "Relevant für Avata 2, Goggles 3 und Firmware-Themen. Erfahrungsberichte, kein Support-Kanal.",
+    "url": "https://www.reddit.com/r/dji/",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "reddit-drohnen",
+    "name": "r/drohnen",
+    "category": "community",
+    "country": "DE",
+    "focus": "Deutschsprachige Drohnen-Community",
+    "note": "Der Ort für Fragen zu deutscher Rechtslage, dipul und Versicherungen — dort sitzen Leute mit demselben Papierkram.",
+    "url": "https://www.reddit.com/r/drohnen/",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "rc-network",
+    "name": "RC-Network",
+    "category": "community",
+    "country": "DE",
+    "focus": "Deutschsprachiges Modellflug-Forum",
+    "note": "Alteingesessen und breit aufgestellt. Stark bei Modellflugrecht, Verbänden und Vereinsfragen.",
+    "url": "https://www.rc-network.de",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "lba",
+    "name": "Luftfahrt-Bundesamt",
+    "category": "behoerde",
+    "country": "DE",
+    "focus": "Zuständige Behörde für Drohnenbetrieb",
+    "note": "Registrierung, Kompetenznachweise, Betriebskategorien. Die verbindliche Quelle, wenn eine Info im Netz widersprüchlich ist.",
+    "url": "https://www.lba.de",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "lba-openuav-link",
+    "name": "LBA OpenUAV Portal",
+    "category": "behoerde",
+    "country": "DE",
+    "focus": "Registrierung und A1/A3-Nachweis",
+    "note": "Hier laufen Betreiberregistrierung (20 €) und Online-Test (25 €).",
+    "url": "https://lba-openuav.de",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "dipul-link",
+    "name": "dipul Map Tool (DFS)",
+    "category": "behoerde",
+    "country": "DE",
+    "focus": "Amtliche Geo-Zonen-Karte",
+    "note": "Vor jedem Flug. Naturschutz, Flugplatzumfeld, Sperrgebiete und Höhenbeschränkungen.",
+    "url": "https://maptool-dipul.dfs.de",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "dmo",
+    "name": "DMO — Deutsche Modellsport Organisation",
+    "category": "behoerde",
+    "country": "DE",
+    "focus": "Drohnen-Haftpflicht mit Verbandsregeln",
+    "note": "Die Empfehlung für den Start: eine Online-Police, kein Vereinsleben, und über die DMFV-Kooperation FPV unter 30 m ohne Spotter.",
+    "url": "https://www.deutsche-modellsport-organisation.de/drohnenversicherung/private-drohnenversicherung",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "dmfv",
+    "name": "DMFV",
+    "category": "behoerde",
+    "country": "DE",
+    "focus": "Deutscher Modellflieger Verband",
+    "note": "Die Regeln, unter denen über die DMO geflogen wird. Eigene Mitgliedschaft daneben ist nicht nötig.",
+    "url": "https://www.dmfv.aero",
+    "lastChecked": "2026-08-30"
+  },
+  {
+    "id": "mfsd",
+    "name": "MFSD",
+    "category": "behoerde",
+    "country": "DE",
+    "focus": "Modellflugsportverband Deutschland",
+    "note": "Alternative zur DMO, Tarif „Maverick\" mit 12 Mio. Deckung. Ebenfalls ohne Verein vor Ort.",
+    "url": "https://www.mfsd.de",
+    "lastChecked": "2026-08-30"
+  }
+]

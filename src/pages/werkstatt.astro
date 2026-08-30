@@ -1,0 +1,337 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import DataMatrix, { type MatrixItem } from '~/components/DataMatrix.astro';
+import { href } from '~/lib/format';
+
+const PART_CATS = [
+  { id: 'drohne', label: 'Fluggeräte' },
+  { id: 'vtx', label: 'Bild & Funk' },
+  { id: 'akku', label: 'Akku & Laden' },
+  { id: 'werkzeug', label: 'Werkzeug' },
+  { id: 'ersatzteil', label: 'Ersatz & Verbrauch' },
+];
+
+const PART_STATUS = {
+  wunsch: { label: 'Wunsch', tone: 'accent' as const },
+  beobachten: { label: 'beobachten', tone: 'muted' as const },
+  bestellt: { label: 'bestellt', tone: 'accent' as const },
+  gekauft: { label: 'gekauft', tone: 'ok' as const },
+};
+
+const parts = await getCollection('parts');
+const partItems: MatrixItem[] = parts.map((p) => ({
+  id: p.id,
+  name: p.data.name,
+  url: p.data.url,
+  category: p.data.category,
+  meta: p.data.priceEur ? `ca. ${p.data.priceEur} €` : 'offen',
+  status: PART_STATUS[p.data.status],
+  verdict: p.data.note ?? '',
+}));
+
+const STUFEN = [
+  {
+    n: '01',
+    title: 'BNF — fertig gebaut und gebunden',
+    kann: 'Auspacken, binden, fliegen',
+    loeten: 'nein',
+    kosten: 'ca. 350–550 €',
+    text: 'Modelle wie die Nazgul-Klasse gibt es mit ab Werk verbautem DJI-Air-Unit. Brille und Sender sind bereits vorhanden — es kommt nur das Fluggerät dazu. Für den Sprung von der Avata auf ein echtes 5" der direkteste Weg.',
+    fallen: 'Vor dem Kauf prüfen, welche Air-Unit-Variante mit Goggles 3 und FPV RC 3 in der jeweils aktuellen Firmware zusammenarbeitet. Die Kombinationen ändern sich häufig.',
+    state: 'ziel',
+  },
+  {
+    n: '02',
+    title: 'PNP — selbst konfigurieren',
+    kann: 'Betaflight einrichten, Air Unit montieren, Stecker crimpen',
+    loeten: 'wenig',
+    kosten: 'ca. 300–450 €',
+    text: 'Das Fluggerät kommt ohne Bildübertragung und teils ohne Empfänger. Air Unit einbauen, Betaflight konfigurieren, Rates und Failsafe selbst setzen. Deutlich mehr Verständnis für das, was später kaputtgeht.',
+    fallen: 'Failsafe ernst nehmen: Was passiert bei Signalverlust? Falsch eingestellt fliegt ein 5" weiter statt zu landen.',
+    state: 'spaeter',
+  },
+  {
+    n: '03',
+    title: 'Full Build — alles selbst',
+    kann: 'Löten, Motoren wickeln nicht, aber alles andere',
+    loeten: 'ja, viel',
+    kosten: 'ca. 400–700 € plus Werkzeug',
+    text: 'Frame, Flight Controller, ESC, Motoren, Kamera, Air Unit — alles einzeln gekauft und verlötet. Am günstigsten pro Reparatur, am teuersten beim ersten Versuch. Lohnt, wenn Reparieren zur Routine geworden ist.',
+    fallen: 'Der erste Einschaltversuch gehört an einen Smoke Stopper. Ein Kurzschluss ohne ihn kostet den kompletten Stack.',
+    state: 'spaeter',
+  },
+];
+
+const KOMPAT = [
+  ['Goggles 3', 'DJI O4 Air Unit (Pro / Lite)', 'Der Weg, um die vorhandene Brille weiterzuverwenden', 'vor Kauf prüfen'],
+  ['FPV Remote Controller 3', 'DJI-Steuerlink über die Air Unit', 'Kein separater ELRS-Empfänger nötig', 'vor Kauf prüfen'],
+  ['Goggles 3', 'Analoge VTX', 'Nicht kompatibel — analog braucht eine andere Brille', 'gesichert'],
+  ['Goggles 3', 'HDZero / Walksnail', 'Andere digitale Systeme, eigene Brillen', 'gesichert'],
+];
+
+const WERKZEUG = [
+  { name: 'Lötstation, temperaturgeregelt', why: 'Meißelspitze, ab ca. 80 €. Ein ungeregelter Kolben erzeugt kalte Lötstellen, die im Flug abreißen.' },
+  { name: 'Smoke Stopper', why: 'Strombegrenzung beim ersten Einschalten. Rettet den Stack, wenn eine Lötbrücke übersehen wurde.' },
+  { name: 'Seitenschneider und Abisolierzange', why: 'Nicht die Küchenschere. Saubere Kabelenden sind der halbe Weg zur sauberen Lötstelle.' },
+  { name: 'Schrumpfschlauch in mehreren Größen', why: 'Jede blanke Stelle an einem Quad findet irgendwann Kontakt zu Carbon.' },
+  { name: 'Kleines Multimeter', why: 'Durchgang prüfen, bevor Strom fließt. Kostet 15 € und erspart Rätselraten.' },
+  { name: 'LiPo-Ladegerät mit Balancer', why: 'Erst mit eigenen LiPos nötig — die Avata lädt über ihren Hub.' },
+  { name: 'Schraubensicherung, mittelfest', why: 'Motorschrauben lösen sich durch Vibration. Blau, nicht rot.' },
+];
+---
+
+<Base
+  title="Werkstatt"
+  description="Der Weg von der Avata 2 zu 3- und 5-Zoll-Freestyle: BNF, PNP oder Selbstbau, DJI-Kompatibilität mit Goggles 3, Werkzeug, Löten und Teileliste."
+  path="/werkstatt"
+>
+  <SectionHead
+    index="11"
+    title="Werkstatt & Ausbau"
+    lead="Der nächste Schritt nach der Avata muss kein Selbstbau sein. Es gibt fertige Modelle, die mit der vorhandenen Brille und dem vorhandenen Sender fliegen — Löten kommt dazu, wenn es Spaß macht, nicht als Eintrittshürde."
+    meta="Planung, noch keine Kaufentscheidung"
+  />
+
+  <section id="pfad" class="anchor">
+    <Panel label="Ausbau-Pfad" meta="drei Wege, ein Ziel">
+      <p class="intro">
+        Alle drei Stufen führen zu einem 5"-Freestyle-Quad, das mit den Goggles 3 fliegt. Sie
+        unterscheiden sich darin, wie viel man vorher können muss — und wie viel man danach
+        selbst reparieren kann.
+      </p>
+      <div class="stufen">
+        {
+          STUFEN.map((s) => (
+            <article class={`stufe ${s.state === 'ziel' ? 'is-ziel' : ''}`}>
+              <header>
+                <span class="n">{s.n}</span>
+                <h3>{s.title}</h3>
+                {s.state === 'ziel' && <span class="tag">wahrscheinlich der Start</span>}
+              </header>
+              <p class="s-text">{s.text}</p>
+              <dl class="s-facts">
+                <div><dt>Voraussetzung</dt><dd>{s.kann}</dd></div>
+                <div><dt>Löten</dt><dd>{s.loeten}</dd></div>
+                <div><dt>Kosten</dt><dd>{s.kosten}</dd></div>
+              </dl>
+              <p class="s-falle">
+                <span class="mono-label">Typischer Fehler</span>
+                {s.fallen}
+              </p>
+            </article>
+          ))
+        }
+      </div>
+    </Panel>
+  </section>
+
+  <section id="dji" class="anchor">
+    <Panel label="DJI-kompatibel bauen" meta="Goggles 3 weiterverwenden" tone="accent">
+      <p class="intro">
+        Der eigentliche Grund, warum dieser Weg attraktiv ist: Brille und Sender sind bereits
+        gekauft. Ein Quad mit DJI-Air-Unit nutzt beide weiter — und weil die Steuerung über den
+        DJI-Link läuft, entfällt das gesamte Thema ExpressLRS.
+      </p>
+      <div class="scroll-x">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Vorhanden</th>
+              <th>Gegenstück</th>
+              <th>Bedeutung</th>
+              <th>Sicherheit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              KOMPAT.map(([a, b, c, d]) => (
+                <tr>
+                  <td class="mono">{a}</td>
+                  <td class="mono">{b}</td>
+                  <td class="muted">{c}</td>
+                  <td class={d === 'gesichert' ? 'ok' : 'check'}>{d}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="warn">
+        <span class="mono-label">Wichtig</span>
+        Firmware-Stände, Bindungsverfahren und die genaue Air-Unit-Bezeichnung ändern sich
+        schneller, als diese Seite gepflegt wird. Alles mit „vor Kauf prüfen“ gehört vor der
+        Bestellung gegen die aktuelle Herstellerangabe und einen frischen Erfahrungsbericht
+        gehalten — nicht gegen diesen Text.
+      </p>
+    </Panel>
+  </section>
+
+  <section id="klassen" class="anchor">
+    <Panel label={'3" gegen 5"'} meta="Einsatzprofil">
+      <div class="scroll-x">
+        <table class="data-table">
+          <thead>
+            <tr><th>Kriterium</th><th>3 Zoll</th><th>5 Zoll</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Einsatz</td><td>enge Spots, Bäume, Innenhöfe</td><td>Freestyle, Tempo, offene Linien</td></tr>
+            <tr><td>Lautstärke</td><td>deutlich leiser</td><td>laut — Nachbarn merken es</td></tr>
+            <tr><td>Crashkosten</td><td>gering</td><td>spürbar höher</td></tr>
+            <tr><td>Akku</td><td>kleiner, kürzere Flüge</td><td>größer, mehr Reserve</td></tr>
+            <tr><td>Gewicht</td><td>je nach Aufbau ab ca. 250 g</td><td>meist 600–800 g</td></tr>
+            <tr><td>Rechtlicher Rahmen</td><td>abhängig vom Gewicht</td><td>ohne C-Klasse in A3</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="warn">
+        <span class="mono-label">Rechtlicher Unterschied</span>
+        Die Avata 2 ist als <strong>C1</strong> eingestuft und fliegt damit typischerweise in
+        A1. Ein selbst gebautes oder als BNF gekauftes Modell ohne C-Klassifizierung landet in
+        <strong>A3</strong>: Abstand von 150 m zu Wohn-, Gewerbe- und Erholungsgebieten. Das ist
+        kein Detail, sondern verändert, wo überhaupt geflogen werden darf. Details im
+        <a href={`${href('/wissen')}#04-recht-fliegen`}>Rechtsteil</a>.
+      </p>
+    </Panel>
+  </section>
+
+  <section id="werkzeug" class="anchor">
+    <Panel label="Löten & Werkzeug" meta="Grundausstattung">
+      <p class="intro">
+        Nichts davon wird für die Avata 2 gebraucht. Alles davon wird ab Stufe 02 gebraucht.
+        Wer erst einmal üben will: alte Elektronik zerlegen und Kabel an Schrott löten, bevor
+        ein 40-€-Flight-Controller darunter liegt.
+      </p>
+      <ul class="werkzeug">
+        {
+          WERKZEUG.map((w) => (
+            <li>
+              <b>{w.name}</b>
+              <span>{w.why}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </Panel>
+  </section>
+
+  <section id="teile" class="anchor">
+    <Panel label="Teileliste" meta={`${parts.length} Einträge`}>
+      <p class="intro">
+        Wunschliste und Beobachtungsposten — wächst mit, statt einmalig zu veralten. Preise sind
+        Anhaltspunkte.
+      </p>
+      <DataMatrix
+        items={partItems}
+        categories={PART_CATS}
+        metaLabel="Preis"
+        searchPlaceholder="Teil oder Werkzeug suchen …"
+      />
+    </Panel>
+  </section>
+
+  <Panel label="Weiter" tone="accent">
+    <div class="links">
+      <a class="btn" href={href('/links')}>Shops und Hersteller</a>
+      <a class="btn" href={href('/tools')}>Betaflight & Co.</a>
+      <a class="btn" href={href('/hangar')}>Aktuelle Hardware</a>
+    </div>
+  </Panel>
+</Base>
+
+<style>
+  .anchor {
+    margin-bottom: var(--s5);
+    scroll-margin-top: calc(var(--topbar-h) + var(--tabbar-h) + var(--s4));
+  }
+  .intro { font-size: var(--fs-small); color: var(--muted); max-width: 76ch; }
+
+  .stufen { display: grid; gap: var(--s4); margin-top: var(--s5); }
+  .stufe {
+    padding: var(--s5);
+    background: var(--panel-sunk);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--line-strong);
+  }
+  .stufe.is-ziel { border-left-color: var(--accent); }
+
+  .stufe header { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; }
+  .stufe .n { font-family: var(--font-mono); font-size: var(--fs-tiny); color: var(--muted-deep); }
+  .is-ziel .n { color: var(--accent); }
+  .stufe h3 { font-size: var(--fs-h3); }
+  .tag {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 2px 6px;
+  }
+
+  .s-text { margin-top: var(--s3); font-size: var(--fs-small); color: var(--text-dim); max-width: 76ch; }
+
+  .s-facts {
+    margin-top: var(--s4);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--s4);
+    padding: var(--s3) 0;
+    border-top: 1px solid var(--line-faint);
+    border-bottom: 1px solid var(--line-faint);
+  }
+  .s-facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    color: var(--muted-deep);
+  }
+  .s-facts dd { margin-top: 2px; font-size: var(--fs-small); color: var(--text-dim); }
+
+  .s-falle {
+    margin-top: var(--s4);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--fs-small);
+    color: var(--muted);
+  }
+
+  .mono { font-family: var(--font-mono); font-size: var(--fs-micro); }
+  .muted { color: var(--muted); font-size: var(--fs-small); }
+  .ok { color: var(--gps); font-family: var(--font-mono); font-size: var(--fs-micro); white-space: nowrap; }
+  .check { color: var(--accent); font-family: var(--font-mono); font-size: var(--fs-micro); white-space: nowrap; }
+
+  .warn {
+    margin-top: var(--s5);
+    padding: var(--s3) var(--s4);
+    border-left: 2px solid var(--armed);
+    background: var(--armed-wash);
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+    max-width: 80ch;
+  }
+
+  .werkzeug { list-style: none; margin: var(--s5) 0 0; padding: 0; }
+  .werkzeug li {
+    padding: var(--s3) 0;
+    border-bottom: 1px solid var(--line-faint);
+  }
+  .werkzeug li:last-child { border-bottom: none; }
+  .werkzeug b { font-family: var(--font-mono); font-size: var(--fs-small); color: var(--text); }
+  .werkzeug span { display: block; margin-top: 2px; font-size: var(--fs-small); color: var(--muted); }
+
+  .links { display: flex; flex-wrap: wrap; gap: var(--s3); }
+
+  @media (max-width: 600px) {
+    .tag { margin-left: 0; }
+    .stufe { padding: var(--s4); }
+  }
+</style>

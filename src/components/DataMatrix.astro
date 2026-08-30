@@ -1,0 +1,265 @@
+---
+import { fmtDate } from '~/lib/format';
+
+export interface MatrixItem {
+  id: string;
+  name: string;
+  url?: string;
+  /** Kategorie-ID, muss zu einer der categories passen */
+  category: string;
+  /** Kleine Marker rechts vom Namen, z. B. Plattformen oder Land */
+  badges?: string[];
+  /** Rechte Spalte, z. B. Preis */
+  meta?: string;
+  /** Statusmarke mit eigener Farbe */
+  status?: { label: string; tone: 'ok' | 'accent' | 'muted' | 'alert' };
+  /** Fliesstext: die eigentliche Einschaetzung */
+  verdict: string;
+  checked?: Date;
+}
+
+interface Props {
+  items: MatrixItem[];
+  categories: { id: string; label: string }[];
+  /** Beschriftung der rechten Spalte im Kopf */
+  metaLabel?: string;
+  searchPlaceholder?: string;
+  /** Beschriftung des Datums-Hinweises */
+  checkedLabel?: string;
+}
+
+const {
+  items,
+  categories,
+  metaLabel = 'Preis',
+  searchPlaceholder = 'Suchen …',
+  checkedLabel = 'geprüft',
+} = Astro.props;
+---
+
+<div class="matrix" data-matrix>
+  <div class="controls">
+    <label class="search">
+      <span class="sr-only">{searchPlaceholder}</span>
+      <input type="search" placeholder={searchPlaceholder} data-q autocomplete="off" />
+    </label>
+    <span class="count mono-label" data-count>{items.length}</span>
+  </div>
+
+  <div class="filters scroll-x" role="group" aria-label="Nach Kategorie filtern">
+    <button class="btn" type="button" data-cat="alle" aria-pressed="true">Alle</button>
+    {
+      categories.map((c) => (
+        <button class="btn" type="button" data-cat={c.id}>
+          {c.label}
+          <span class="cat-n">{items.filter((i) => i.category === c.id).length}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="head" aria-hidden="true">
+    <span>Name</span>
+    <span>Einschätzung</span>
+    <span class="ta-r">{metaLabel}</span>
+  </div>
+
+  <ul class="rows">
+    {
+      items.map((it) => (
+        <li
+          class="row"
+          data-cat={it.category}
+          data-text={`${it.name} ${it.verdict} ${(it.badges ?? []).join(' ')}`.toLowerCase()}
+        >
+          <div class="c-name">
+            <div class="nm">
+              {it.url ? (
+                <a href={it.url} target="_blank" rel="noopener noreferrer">
+                  {it.name}
+                </a>
+              ) : (
+                <span>{it.name}</span>
+              )}
+              {it.status && <span class={`stat t-${it.status.tone}`}>{it.status.label}</span>}
+            </div>
+            {it.badges && it.badges.length > 0 && (
+              <div class="badges">
+                {it.badges.map((b) => (
+                  <span class="badge">{b}</span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div class="c-verdict">
+            <p>{it.verdict}</p>
+            {it.checked && (
+              <span class="checked mono-label">
+                {checkedLabel} {fmtDate(it.checked)}
+              </span>
+            )}
+          </div>
+
+          <div class="c-meta">{it.meta}</div>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="empty mono-label" data-empty hidden>Kein Treffer</p>
+</div>
+
+<style>
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    margin-bottom: var(--s3);
+  }
+  .search { flex: 1; }
+  input[type='search'] {
+    width: 100%;
+    padding: var(--s2) var(--s3);
+    background: var(--panel-sunk);
+    border: 1px solid var(--line-strong);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+  }
+  input[type='search']::placeholder { color: var(--muted-deep); }
+  input[type='search']:focus { border-color: var(--accent); outline: none; }
+  .count { flex: none; color: var(--muted-deep); }
+
+  .filters {
+    display: flex;
+    gap: 0;
+    padding-bottom: 2px;
+    margin-bottom: var(--s5);
+  }
+  .filters .btn + .btn { margin-left: -1px; }
+  .cat-n {
+    margin-left: var(--s2);
+    font-size: 0.625rem;
+    color: var(--muted-deep);
+  }
+  .btn[aria-pressed='true'] .cat-n { color: var(--accent-dim); }
+
+  .head,
+  .row {
+    display: grid;
+    grid-template-columns: minmax(160px, 220px) 1fr 90px;
+    gap: var(--s4);
+  }
+  .head {
+    padding: 0 var(--s3) var(--s2);
+    border-bottom: 1px solid var(--line-strong);
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    color: var(--muted-deep);
+  }
+  .ta-r { text-align: right; }
+
+  .rows { list-style: none; margin: 0; padding: 0; }
+  .row {
+    padding: var(--s4) var(--s3);
+    border-bottom: 1px solid var(--line-faint);
+    align-items: start;
+    transition: background-color var(--dur) var(--ease);
+  }
+  .row:hover { background: var(--panel-hi); }
+  .row[hidden] { display: none; }
+
+  .nm {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s2);
+    flex-wrap: wrap;
+  }
+  .nm a, .nm span:first-child {
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    font-weight: 500;
+    color: var(--text);
+    border-bottom-color: transparent;
+  }
+  .nm a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .stat {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--tr-mid);
+    text-transform: uppercase;
+    padding: 1px 5px;
+    border: 1px solid currentColor;
+  }
+  .t-ok { color: var(--gps); }
+  .t-accent { color: var(--accent); }
+  .t-muted { color: var(--muted-deep); }
+  .t-alert { color: var(--armed); }
+
+  .badges { margin-top: var(--s2); display: flex; flex-wrap: wrap; gap: var(--s1); }
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.04em;
+    color: var(--muted-deep);
+    border: 1px solid var(--line);
+    padding: 1px 4px;
+  }
+
+  .c-verdict p { font-size: var(--fs-small); color: var(--text-dim); }
+  .checked { display: block; margin-top: var(--s2); color: var(--muted-deep); }
+
+  .c-meta {
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    color: var(--muted);
+    text-align: right;
+  }
+
+  .empty { padding: var(--s7) 0; text-align: center; }
+
+  @media (max-width: 760px) {
+    .head { display: none; }
+    .row { grid-template-columns: 1fr; gap: var(--s2); }
+    .c-meta { text-align: left; }
+  }
+</style>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-matrix]')) {
+    const q = root.querySelector<HTMLInputElement>('[data-q]')!;
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-cat]'));
+    const rows = Array.from(root.querySelectorAll<HTMLElement>('.row'));
+    const count = root.querySelector<HTMLElement>('[data-count]')!;
+    const empty = root.querySelector<HTMLElement>('[data-empty]')!;
+
+    let cat = 'alle';
+
+    const apply = () => {
+      const needle = q.value.trim().toLowerCase();
+      let visible = 0;
+      for (const r of rows) {
+        const okCat = cat === 'alle' || r.dataset.cat === cat;
+        const okText = !needle || (r.dataset.text ?? '').includes(needle);
+        const show = okCat && okText;
+        r.hidden = !show;
+        if (show) visible++;
+      }
+      count.textContent = String(visible);
+      empty.hidden = visible > 0;
+    };
+
+    q.addEventListener('input', apply);
+    for (const b of buttons) {
+      b.addEventListener('click', () => {
+        cat = b.dataset.cat!;
+        for (const other of buttons) other.setAttribute('aria-pressed', String(other === b));
+        apply();
+      });
+    }
+  }
+</script>

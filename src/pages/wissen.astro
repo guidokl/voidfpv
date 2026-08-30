@@ -1,0 +1,147 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import Glossary from '~/components/Glossary.astro';
+import Stepper from '~/components/Stepper.astro';
+import { href, fmtDate } from '~/lib/format';
+
+const chapters = (await getCollection('wissen')).sort((a, b) => a.data.order - b.data.order);
+const rendered = await Promise.all(
+  chapters.map(async (c) => ({ entry: c, Content: (await render(c)).Content })),
+);
+
+// Glossar und Lernpfad sind eigene Darstellungen, nicht bloss Prosa
+const SPECIAL: Record<string, 'glossar' | 'lernpfad'> = {
+  '02-begriffe': 'glossar',
+  '03-lernpfad': 'lernpfad',
+};
+
+const tabs = chapters.map((c) => ({ label: c.data.title, href: `#${c.id}` }));
+const lastUpdate = chapters
+  .map((c) => c.data.updated.getTime())
+  .reduce((a, b) => Math.max(a, b), 0);
+---
+
+<Base
+  title="Wissen"
+  description="Wissensbasis zum FPV-Einstieg: Technik und Flugmodi, Begriffe, Lernpfad, Luftrecht, Veröffentlichungsrecht, Crash-Kosten und Praxis."
+  path="/wissen"
+  tabs={tabs}
+>
+  <SectionHead
+    index="10"
+    title="Wissen"
+    lead="Die gesammelte Grundlage für den Einstieg — aus dem eigenen Pilot-Guide übernommen und in Kapitel sortiert. Technik, Sprache, Lernreihenfolge, Recht und die Dinge, die im ersten Monat wirklich passieren."
+    meta={`Stand ${fmtDate(new Date(lastUpdate))}`}
+  />
+
+  <Panel label="Quelle" meta="MyDocs/Avata-2-Pilot-Guide.md">
+    <p class="src">
+      Alle Kapitel stammen aus der eigenen Sammeldatei und werden dort gepflegt. Die
+      Rechtsteile sind eine private Zusammenfassung, <strong>keine Rechtsberatung</strong> —
+      im Zweifel gilt die amtliche Quelle, für Geo-Zonen also
+      <a href="https://maptool-dipul.dfs.de" target="_blank" rel="noopener noreferrer">dipul</a>.
+    </p>
+  </Panel>
+
+  {
+    rendered.map(({ entry, Content }) => {
+      const special = SPECIAL[entry.id];
+      return (
+        <article class="chapter" id={entry.id}>
+          <header class="ch-head">
+            <span class="ch-idx">{String(entry.data.order).padStart(2, '0')}</span>
+            <div>
+              <h2>{entry.data.title}</h2>
+              <p class="ch-sum">{entry.data.summary}</p>
+            </div>
+          </header>
+
+          {entry.data.legal && (
+            <p class="legal-note">
+              <span class="mono-label">Hinweis</span>
+              Private Zusammenfassung, keine Rechtsberatung. Rechtslage ändert sich —
+              Stand {fmtDate(entry.data.updated)}.
+            </p>
+          )}
+
+          <div class="prose">
+            <Content />
+          </div>
+
+          {special === 'glossar' && (
+            <div class="special">
+              <Glossary />
+            </div>
+          )}
+          {special === 'lernpfad' && (
+            <div class="special" id="lernpfad">
+              <Stepper />
+            </div>
+          )}
+        </article>
+      );
+    })
+  }
+
+  <Panel label="Weiter" tone="accent">
+    <div class="links">
+      <a class="btn" href={href('/checklisten')}>Zu den Checklisten</a>
+      <a class="btn" href={href('/papierkram')}>Papierkram-Reihenfolge</a>
+      <a class="btn" href={href('/tools')}>Tools und Apps</a>
+      <a class="btn" href={href('/hangar')}>Datenblätter im Hangar</a>
+    </div>
+  </Panel>
+</Base>
+
+<style>
+  .src { font-size: var(--fs-small); color: var(--muted); max-width: 70ch; }
+
+  .chapter {
+    margin-top: var(--s9);
+    scroll-margin-top: calc(var(--topbar-h) + var(--tabbar-h) + var(--s4));
+  }
+  .ch-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--s4);
+    align-items: start;
+    padding-bottom: var(--s4);
+    border-bottom: 1px solid var(--line-strong);
+    margin-bottom: var(--s5);
+  }
+  .ch-idx {
+    font-family: var(--font-mono);
+    font-size: var(--fs-tiny);
+    font-weight: 600;
+    color: #000;
+    background: var(--accent);
+    padding: 3px 6px;
+    margin-top: 4px;
+  }
+  h2 { font-size: var(--fs-h2); }
+  .ch-sum {
+    margin-top: var(--s2);
+    max-width: 66ch;
+    color: var(--muted);
+    font-size: var(--fs-small);
+  }
+
+  .legal-note {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+    padding: var(--s3) var(--s4);
+    margin-bottom: var(--s5);
+    border-left: 2px solid var(--armed);
+    background: var(--armed-wash);
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+  }
+
+  .special { margin-top: var(--s6); }
+
+  .links { display: flex; flex-wrap: wrap; gap: var(--s3); }
+</style>

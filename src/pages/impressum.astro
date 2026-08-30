@@ -1,0 +1,131 @@
+---
+import Base from '~/layouts/Base.astro';
+import Panel from '~/components/Panel.astro';
+import { href } from '~/lib/format';
+---
+
+<Base
+  title="Impressum"
+  description="Impressum und Anbieterkennzeichnung für voidfpv."
+  path="/impressum"
+  hideTabs
+>
+  <header class="head">
+    <span class="mono-label">Rechtliches</span>
+    <h1>Impressum</h1>
+    <div class="rule" aria-hidden="true"></div>
+  </header>
+
+  <Panel label="Auszufüllen" tone="alert">
+    <p class="todo">
+      <span class="mono-label">Achtung</span>
+      Diese Seite ist ein <strong>Gerüst</strong>. Vor der Veröffentlichung müssen die Felder mit
+      <code>AUSFÜLLEN</code> durch die echten Angaben ersetzt werden — in
+      <code>src/pages/impressum.astro</code>.
+    </p>
+    <p class="todo-sub">
+      Für eine rein private, nicht kommerzielle Seite ohne Werbung, Sponsoring und
+      Affiliate-Links ist die Impressumspflicht nach § 5 DDG umstritten. Sobald aber Einnahmen,
+      Kooperationen oder Reichweitenabsichten dazukommen, ist sie eindeutig. Eine korrekte
+      Angabe kostet nichts und beendet die Diskussion.
+    </p>
+  </Panel>
+
+  <Panel label="Angaben gemäß § 5 DDG">
+    <dl class="fields">
+      <div><dt>Name</dt><dd class="fill">AUSFÜLLEN — Vor- und Nachname</dd></div>
+      <div><dt>Anschrift</dt><dd class="fill">AUSFÜLLEN — Straße, Hausnummer</dd></div>
+      <div><dt>PLZ, Ort</dt><dd class="fill">AUSFÜLLEN</dd></div>
+      <div><dt>Land</dt><dd>Deutschland</dd></div>
+      <div><dt>E-Mail</dt><dd class="fill">AUSFÜLLEN — Kontaktadresse</dd></div>
+    </dl>
+    <p class="note">
+      Eine Postfachadresse reicht nicht aus; es muss eine ladungsfähige Anschrift sein. Wer die
+      eigene Wohnadresse nicht veröffentlichen will, sollte die Seite nicht öffentlich stellen
+      oder eine ladungsfähige Alternative organisieren.
+    </p>
+  </Panel>
+
+  <Panel label="Verantwortlich für den Inhalt">
+    <dl class="fields">
+      <div><dt>Nach § 18 Abs. 2 MStV</dt><dd class="fill">AUSFÜLLEN — Name und Anschrift wie oben</dd></div>
+    </dl>
+  </Panel>
+
+  <Panel label="Haftung und Rechte">
+    <div class="prose">
+      <h2>Inhalt</h2>
+      <p>
+        Diese Seite ist ein privates Logbuch. Die Inhalte — insbesondere die Zusammenfassungen
+        zum Luftrecht, zum Recht am eigenen Bild und zum Urheberrecht — sind nach bestem Wissen
+        zusammengetragen, aber <strong>keine Rechtsberatung</strong>. Verbindlich sind
+        ausschließlich die jeweils geltenden Gesetze und die Auskünfte der zuständigen Stellen,
+        für Geo-Zonen also dipul beziehungsweise das Luftfahrt-Bundesamt.
+      </p>
+
+      <h2>Externe Links</h2>
+      <p>
+        Diese Seite verweist an vielen Stellen auf externe Angebote. Auf deren Inhalte besteht
+        kein Einfluss; zum Zeitpunkt der Aufnahme wurde jede verlinkte Adresse aufgerufen und
+        auf offensichtliche Rechtsverstöße geprüft. Für die Inhalte der verlinkten Seiten sind
+        deren Betreiber verantwortlich.
+      </p>
+
+      <h2>Urheberrecht</h2>
+      <p>
+        Texte und Bilder dieser Seite stammen, soweit nicht anders gekennzeichnet, vom
+        Betreiber. Namen, Kanäle und Werke Dritter werden im Rahmen der Berichterstattung
+        genannt und verlinkt; die Rechte daran liegen bei den jeweiligen Urhebern. Videos werden
+        nicht eingebettet, sondern ausschließlich verlinkt.
+      </p>
+
+      <h2>Marken</h2>
+      <p>
+        DJI, Betaflight und weitere genannte Produkt- und Firmennamen sind Marken der jeweiligen
+        Inhaber. Ihre Nennung dient der Beschreibung; es besteht keine Verbindung zu den
+        Herstellern und keine Werbebeziehung.
+      </p>
+    </div>
+  </Panel>
+
+  <Panel label="Weiter">
+    <div class="links">
+      <a class="btn" href={href('/datenschutz')}>Datenschutzerklärung</a>
+      <a class="btn" href={href('/')}>Zur Startseite</a>
+    </div>
+  </Panel>
+</Base>
+
+<style>
+  .head { margin-bottom: var(--s6); }
+  h1 { margin-top: var(--s2); font-size: var(--fs-h1); }
+  .rule {
+    margin-top: var(--s5);
+    height: 1px;
+    background-image: linear-gradient(to right, var(--line-strong) 2px, transparent 2px);
+    background-size: 6px 1px;
+  }
+
+  .todo { display: flex; flex-direction: column; gap: var(--s1); font-size: var(--fs-small); color: var(--text-dim); }
+  .todo-sub { margin-top: var(--s3); font-size: var(--fs-small); color: var(--muted); max-width: 76ch; }
+
+  .fields { display: grid; gap: 0; }
+  .fields > div {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--s4);
+    padding: var(--s3) 0;
+    border-bottom: 1px solid var(--line-faint);
+  }
+  .fields > div:last-child { border-bottom: none; }
+  dt { font-size: var(--fs-small); color: var(--muted); }
+  dd { font-family: var(--font-mono); font-size: var(--fs-small); color: var(--text); }
+  .fill { color: var(--armed); }
+
+  .note { margin-top: var(--s4); font-size: var(--fs-tiny); color: var(--muted-deep); max-width: 76ch; }
+  .links { display: flex; gap: var(--s3); flex-wrap: wrap; }
+
+  @media (max-width: 620px) {
+    .fields > div { grid-template-columns: 1fr; gap: var(--s1); }
+  }
+</style>

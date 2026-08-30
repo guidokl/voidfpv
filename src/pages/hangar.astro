@@ -1,0 +1,166 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import SpecTable from '~/components/SpecTable.astro';
+import StatusLed from '~/components/StatusLed.astro';
+import { href, fmtDate } from '~/lib/format';
+
+const all = (await getCollection('hardware')).sort((a, b) => a.data.order - b.data.order);
+const items = await Promise.all(
+  all.map(async (e) => ({ entry: e, Content: (await render(e)).Content })),
+);
+
+const STATUS_MAP = {
+  owned: { led: 'done' as const, label: 'vorhanden' },
+  ordered: { led: 'pending' as const, label: 'im Zulauf' },
+  planned: { led: 'open' as const, label: 'offen' },
+  considering: { led: 'open' as const, label: 'in Prüfung' },
+};
+
+const tabs = [
+  { label: 'Übersicht', href: '#uebersicht' },
+  ...all.map((e) => ({ label: e.data.name.replace(/^DJI /, ''), href: `#${e.id}` })),
+];
+
+const counts = {
+  ordered: all.filter((e) => e.data.status === 'ordered').length,
+  owned: all.filter((e) => e.data.status === 'owned').length,
+};
+---
+
+<Base
+  title="Hangar"
+  description="Hardware-Übersicht: DJI Avata 2, Goggles 3, FPV Remote Controller 3, Akkus und Zubehör — mit Datenblättern und Status."
+  path="/hangar"
+  tabs={tabs}
+>
+  <SectionHead
+    index="02"
+    title="Hangar"
+    lead="Was da ist, was unterwegs ist und was noch aussteht. Datenblätter aus dem eigenen Pilot-Guide, kein Herstellerprospekt — mit dem, was im Alltag zählt, statt mit dem, was gut klingt."
+    meta={`${counts.owned} vorhanden · ${counts.ordered} im Zulauf`}
+  />
+
+  <section id="uebersicht" class="anchor">
+    <Panel label="Übersicht" meta="Stand des Setups" flush>
+      <div class="scroll-x">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Gerät</th>
+              <th>Rolle</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              all.map((e) => (
+                <tr>
+                  <td>
+                    <a href={`#${e.id}`}>{e.data.name}</a>
+                  </td>
+                  <td class="role">{e.data.summary.split('.')[0]}.</td>
+                  <td class="st">
+                    <StatusLed
+                      state={STATUS_MAP[e.data.status].led}
+                      label={STATUS_MAP[e.data.status].label}
+                    />
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </Panel>
+  </section>
+
+  {
+    items.map(({ entry, Content }) => (
+      <article class="unit anchor" id={entry.id}>
+        <header class="u-head">
+          <div>
+            <h2>{entry.data.name}</h2>
+            <p class="u-sum">{entry.data.summary}</p>
+          </div>
+          <div class="u-status">
+            <StatusLed
+              state={STATUS_MAP[entry.data.status].led}
+              label={STATUS_MAP[entry.data.status].label}
+            />
+            {entry.data.acquired && (
+              <span class="mono-label">seit {fmtDate(entry.data.acquired)}</span>
+            )}
+          </div>
+        </header>
+
+        <div class="u-body">
+          {Object.keys(entry.data.specs).length > 0 && (
+            <div class="u-specs">
+              <Panel label="Datenblatt">
+                <SpecTable rows={entry.data.specs} dense />
+              </Panel>
+            </div>
+          )}
+          <div class="u-text prose">
+            <Content />
+          </div>
+        </div>
+      </article>
+    ))
+  }
+
+  <Panel label="Weiter" tone="accent">
+    <div class="links">
+      <a class="btn" href={href('/werkstatt')}>Ausbau Richtung 3" und 5"</a>
+      <a class="btn" href={href('/checklisten')}>Packliste</a>
+      <a class="btn" href={`${href('/wissen')}#01-specs-und-modi`}>Flugmodi erklärt</a>
+    </div>
+  </Panel>
+</Base>
+
+<style>
+  .anchor { scroll-margin-top: calc(var(--topbar-h) + var(--tabbar-h) + var(--s4)); }
+
+  .role { color: var(--muted); font-size: var(--fs-small); }
+  .st { white-space: nowrap; }
+
+  .unit { margin-top: var(--s9); }
+  .u-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--s5);
+    padding-bottom: var(--s4);
+    border-bottom: 1px solid var(--line-strong);
+  }
+  h2 { font-size: var(--fs-h2); }
+  .u-sum {
+    margin-top: var(--s2);
+    max-width: 62ch;
+    color: var(--muted);
+    font-size: var(--fs-small);
+  }
+  .u-status { display: grid; gap: var(--s2); justify-items: end; flex: none; }
+
+  .u-body {
+    margin-top: var(--s5);
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) 1fr;
+    gap: var(--s5);
+    align-items: start;
+  }
+  .u-text { max-width: none; }
+
+  .links { display: flex; flex-wrap: wrap; gap: var(--s3); }
+
+  @media (max-width: 900px) {
+    .u-body { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .u-head { flex-direction: column; }
+    .u-status { justify-items: start; }
+  }
+</style>

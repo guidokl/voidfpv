@@ -1,0 +1,61 @@
+---
+/** Kopf einer Sektionsseite: Index, Titel, Beschreibung, optionale Randnotiz. */
+interface Props {
+  index: string;
+  title: string;
+  lead: string;
+  meta?: string;
+}
+const { index, title, lead, meta } = Astro.props;
+---
+
+<header class="head">
+  <div class="row">
+    <span class="idx">{index}</span>
+    <h1>{title}</h1>
+    {meta && <span class="meta mono-label">{meta}</span>}
+  </div>
+  <p class="lead">{lead}</p>
+  <div class="rule" aria-hidden="true"></div>
+</header>
+
+<style>
+  .head { margin-bottom: var(--s7); }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    flex-wrap: wrap;
+  }
+  .idx {
+    font-family: var(--font-mono);
+    font-size: var(--fs-tiny);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    background: var(--accent);
+    color: #000;
+    padding: 3px 6px;
+  }
+  h1 { font-size: var(--fs-h1); }
+  .meta { margin-left: auto; }
+
+  .lead {
+    margin-top: var(--s3);
+    max-width: 66ch;
+    color: var(--muted);
+    font-size: var(--fs-lead);
+    line-height: var(--lh-snug);
+  }
+  .rule {
+    margin-top: var(--s5);
+    height: 1px;
+    background-image: linear-gradient(to right, var(--line-strong) 2px, transparent 2px);
+    background-size: 6px 1px;
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.625rem; }
+    .lead { font-size: var(--fs-body); }
+    .meta { margin-left: 0; width: 100%; }
+  }
+</style>

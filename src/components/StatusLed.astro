@@ -1,0 +1,48 @@
+---
+/** 6px-Quadrat, kein Kreis. "pending" pulst langsam, "done" steht still. */
+interface Props {
+  state: 'open' | 'pending' | 'done';
+  label?: string;
+  title?: string;
+}
+const { state, label, title } = Astro.props;
+const text = { open: 'offen', pending: 'läuft', done: 'erledigt' }[state];
+---
+
+<span class:list={['led-wrap', `s-${state}`]} title={title ?? `${label ?? ''} — ${text}`.trim()}>
+  <span class="led" aria-hidden="true"></span>
+  {label && <span class="led-label">{label}</span>}
+  <span class="sr-only">{text}</span>
+</span>
+
+<style>
+  .led-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--tr-mid);
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .led {
+    width: 6px;
+    height: 6px;
+    flex: none;
+    background: var(--muted-deep);
+  }
+  .s-open .led    { background: var(--armed); }
+  .s-pending .led { background: var(--accent); animation: pulse 2.4s ease-in-out infinite; }
+  .s-done .led    { background: var(--gps); }
+
+  .s-open .led-label    { color: var(--text-dim); }
+  .s-pending .led-label { color: var(--text-dim); }
+  .s-done .led-label    { color: var(--muted); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.25; }
+  }
+</style>

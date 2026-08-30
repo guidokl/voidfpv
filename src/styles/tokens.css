@@ -1,0 +1,91 @@
+/* ============================================================
+   VOID FPV — Design Tokens
+   Leitbild: OSD-Overlay in der FPV-Brille. Instrument, nicht Portfolio.
+   ============================================================ */
+
+:root {
+  /* --- Farben ------------------------------------------------ */
+  --bg:          #07090b;
+  --bg-deep:     #050608;
+  --panel:       #0d1013;
+  --panel-hi:    #12161a;
+  --panel-sunk:  #0a0c0f;
+
+  --line:        rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --line-faint:  rgba(255, 255, 255, 0.04);
+
+  --text:        #e6e8ea;
+  --text-dim:    #b4bac0;
+  --muted:       #8a9199;
+  /* Bewusst nicht dunkler: bei 11–12 px muss auch die leiseste Stufe
+     WCAG AA erreichen (4,52:1 auf --panel). */
+  --muted-deep:  #757c84;
+
+  --accent:      #ffb000;         /* OSD-Amber */
+  --accent-dim:  #8a6000;
+  --accent-wash: rgba(255, 176, 0, 0.08);
+  --armed:       #ff3b30;         /* Warnung / offen / NO-GO */
+  --armed-wash:  rgba(255, 59, 48, 0.09);
+  --gps:         #3ddc84;         /* OK / erledigt / GO */
+  --gps-wash:    rgba(61, 220, 132, 0.09);
+
+  /* --- Typografie -------------------------------------------- */
+  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-text:    'Inter Tight', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Cascadia Mono', ui-monospace, monospace;
+
+  --fs-micro:  0.6875rem;  /* 11px — Labels, Nav-Indizes */
+  --fs-tiny:   0.75rem;    /* 12px */
+  --fs-small:  0.8125rem;  /* 13px */
+  --fs-body:   0.9375rem;  /* 15px */
+  --fs-lead:   1.0625rem;  /* 17px */
+  --fs-h3:     1.125rem;
+  --fs-h2:     1.5rem;
+  --fs-h1:     2.125rem;
+  --fs-display: 3rem;
+  --fs-readout: 2.75rem;   /* grosse Mono-Zahlen */
+
+  --lh-tight: 1.15;
+  --lh-snug:  1.35;
+  --lh-body:  1.65;
+
+  --tr-wide:  0.14em;      /* Mono-Uppercase-Laufweite */
+  --tr-mid:   0.08em;
+
+  /* --- Raster / Abstaende ------------------------------------ */
+  --u:  4px;
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 64px;
+  --s9: 96px;
+
+  --rail-w:    240px;
+  --topbar-h:  44px;
+  --tabbar-h:  40px;
+  --content-max: 1100px;
+  --grid-cell: 32px;       /* Hintergrund-Punktraster */
+
+  /* --- Motion ------------------------------------------------ */
+  --dur-fast: 80ms;
+  --dur:      120ms;
+  --ease:     cubic-bezier(0.2, 0, 0.2, 1);
+
+  /* --- Z-Ebenen ---------------------------------------------- */
+  --z-rail:     40;
+  --z-topbar:   50;
+  --z-drawer:   60;
+  --z-lightbox: 90;
+
+  color-scheme: dark;
+}
+
+/* Kontrast gegen --panel (#0d1013), gemessen:
+   --text 15,5:1 · --text-dim 9,7:1 · --muted 6,0:1 · --muted-deep 4,5:1
+   --accent 10,4:1 · --gps 10,7:1 · --armed 5,4:1
+   Alle über WCAG AA (4,5:1). Wer einen Ton abdunkelt, prüft das nach. */

@@ -1,0 +1,594 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import EmptyState from '~/components/EmptyState.astro';
+import { coarse, fmtDate } from '~/lib/format';
+import { LIMITS } from '~/lib/gono';
+
+const spotEntries = (await getCollection('spots')).sort((a, b) =>
+  a.data.name.localeCompare(b.data.name, 'de'),
+);
+
+// Koordinaten privater Spots werden gerundet ausgeliefert — sie stehen sonst
+// punktgenau im HTML einer oeffentlichen Seite.
+const spots = spotEntries.map((s) => ({
+  id: s.id,
+  name: s.data.name,
+  area: s.data.area,
+  lat: s.data.coordsPublic ? s.data.lat : coarse(s.data.lat),
+  lon: s.data.coordsPublic ? s.data.lon : coarse(s.data.lon),
+  exact: s.data.coordsPublic,
+}));
+---
+
+<Base
+  title="Wetter"
+  description="Pre-Flight-Briefing für FPV: GO/MARGINAL/NO-GO aus Wind, Böen, Niederschlag, Sicht und Kp-Index, dazu Höhenwind, Windrose, goldene Stunde und Luftraum-Links."
+  path="/wetter"
+>
+  <SectionHead
+    index="03"
+    title="Wetter & Luftraum"
+    lead="Ein Briefing statt einer Wetter-App: Die Werte werden gegen die Grenzen der Avata 2 gerechnet und ergeben ein Urteil, das seine Gründe nennt. Ergänzung zu dipul und den amtlichen Warnungen, kein Ersatz."
+    meta="Open-Meteo · NOAA SWPC"
+  />
+
+  <div data-wetter data-spots={JSON.stringify(spots)}>
+    <!-- Standortwahl ------------------------------------------------------ -->
+    <Panel label="Standort" meta="bleibt auf diesem Gerät">
+      <div class="picker">
+        {
+          spots.length > 0 ? (
+            <label class="p-field">
+              <span class="mono-label">Gespeicherter Spot</span>
+              <select data-wx-spot>
+                <option value="">— wählen —</option>
+                {spots.map((s) => (
+                  <option value={s.id}>
+                    {s.name} · {s.area}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <div class="p-field">
+              <span class="mono-label">Gespeicherte Spots</span>
+              <p class="p-hint">
+                Noch keine angelegt. Spots kommen nach <code>src/content/spots/</code> und
+                erscheinen dann hier zur Auswahl.
+              </p>
+            </div>
+          )
+        }
+
+        <form class="p-field manual" data-wx-manual>
+          <span class="mono-label">Koordinaten</span>
+          <div class="coords">
+            <input name="lat" inputmode="decimal" placeholder="Breite z. B. 51,05" required />
+            <input name="lon" inputmode="decimal" placeholder="Länge z. B. 7,00" required />
+            <button class="btn" type="submit">Abrufen</button>
+          </div>
+        </form>
+
+        <div class="p-field">
+          <span class="mono-label">Oder</span>
+          <button class="btn" type="button" data-wx-geo>Aktuellen Standort verwenden</button>
+          <p class="p-hint">
+            Fragt den Browser, nur auf diesen Klick. Die Position geht als Wetterabfrage an
+            Open-Meteo und wird sonst nirgends gespeichert.
+          </p>
+        </div>
+      </div>
+    </Panel>
+
+    <!-- Zustände ---------------------------------------------------------- -->
+    <div data-wx-state="idle">
+      <Panel label="Briefing">
+        <EmptyState
+          code="WX 00"
+          title="Kein Standort gewählt"
+          reason="Ohne Ort keine Vorhersage. Oben einen Punkt wählen — per Koordinaten, gespeichertem Spot oder Browser-Standort. Die Wahl bleibt lokal im Browser und wird beim nächsten Besuch wiederverwendet."
+          next="Koordinaten aus dipul oder OpenStreetMap ablesen und oben eintragen."
+        />
+      </Panel>
+    </div>
+
+    <div data-wx-state="loading" hidden>
+      <Panel label="Briefing" meta="lädt">
+        <p class="loading mono-label">Daten werden abgerufen …</p>
+      </Panel>
+    </div>
+
+    <div data-wx-state="error" hidden>
+      <Panel label="Briefing nicht verfügbar" tone="alert">
+        <p class="err" data-wx-error-msg></p>
+        <p class="err-sub">
+          Das ändert nichts an den Regeln: <strong>Böen über {LIMITS.gustSoft} m/s</strong> sind
+          im Wald unangenehm, über {LIMITS.gustHard} m/s liegt die Avata 2 außerhalb ihrer
+          Spezifikation. Bei Regen bleibt sie am Boden. Und dipul gilt ohnehin unabhängig von
+          jeder Wetterquelle.
+        </p>
+        <div class="err-actions">
+          <button class="btn" type="button" data-wx-retry>Erneut versuchen</button>
+          <a class="btn" href="https://maptool-dipul.dfs.de" target="_blank" rel="noopener noreferrer">dipul</a>
+          <a class="btn" href="https://www.windy.com" target="_blank" rel="noopener noreferrer">Windy</a>
+          <a class="btn" href="https://www.dwd.de/DE/leistungen/warnwetterapp/warnwetterapp.html" target="_blank" rel="noopener noreferrer">DWD-Warnungen</a>
+        </div>
+      </Panel>
+    </div>
+
+    <!-- Ergebnis ---------------------------------------------------------- -->
+    <div data-wx-state="ready" hidden>
+      <section id="briefing" class="anchor">
+        <div class="verdict-box" data-wx-verdict>
+          <span class="v-tick tl" aria-hidden="true"></span>
+          <span class="v-tick br" aria-hidden="true"></span>
+          <div class="v-head">
+            <div>
+              <span class="mono-label" data-wx-place></span>
+              <div class="v-label" data-wx-verdict-label>—</div>
+              <p class="v-text" data-wx-verdict-text></p>
+            </div>
+            <p class="v-now" data-wx-verdict-now></p>
+          </div>
+          <ul class="rules" data-wx-rules></ul>
+          <p class="v-meta mono-label" data-wx-meta></p>
+        </div>
+
+        <Panel label="Nächste 48 Stunden" meta="Flugfenster">
+          <div class="timeline" data-wx-timeline></div>
+          <div class="legend">
+            <span class="lg go">GO</span>
+            <span class="lg marginal">MARGINAL</span>
+            <span class="lg nogo">NO-GO</span>
+          </div>
+          <p class="window" data-wx-window></p>
+        </Panel>
+      </section>
+
+      <section id="wind" class="anchor">
+        <div class="wind-grid">
+          <Panel label="Wind jetzt">
+            <div class="wnow">
+              <div>
+                <span class="readout" data-wx-wind-now>—</span>
+                <span class="unit-lbl mono-label">m/s Mittelwind</span>
+                <span class="sub mono-label" data-wx-wind-kmh></span>
+              </div>
+              <div>
+                <span class="readout gust" data-wx-gust-now>—</span>
+                <span class="unit-lbl mono-label">m/s Böen</span>
+                <span class="sub mono-label" data-wx-gust-kmh></span>
+              </div>
+            </div>
+            <div class="wmeta">
+              <span class="mono-label" data-wx-bft></span>
+              <span class="mono-label" data-wx-dir></span>
+            </div>
+          </Panel>
+
+          <Panel label="Richtung">
+            <div class="rose" data-wx-rose></div>
+            <p class="hint">Der Pfeil zeigt, wohin der Wind weht.</p>
+          </Panel>
+        </div>
+
+        <Panel label="Höhenprofil" meta="10 / 80 / 120 m">
+          <div class="profile" data-wx-profile></div>
+          <p class="hint">
+            Die Marken im Balken sind {LIMITS.windSoft} m/s und {LIMITS.windHard} m/s. Oben ist
+            es fast immer windiger als am Startplatz — wer auf 100 m steigt, fliegt in anderen
+            Bedingungen als er gestartet ist.
+          </p>
+        </Panel>
+
+        <Panel label="Verlauf" meta="nächste 24 Stunden">
+          <div class="trend" data-wx-trend></div>
+          <div class="legend">
+            <span class="lg line-wind">Mittelwind</span>
+            <span class="lg line-gust">Böen</span>
+          </div>
+          <p class="hint warn">
+            Im Wald und zwischen Gebäuden entstehen Verwirbelungen, die in keiner Vorhersage
+            stehen. Der angezeigte Wert ist die freie Fläche — hinter der ersten Baumreihe kann
+            es deutlich unruhiger sein.
+          </p>
+        </Panel>
+      </section>
+
+      <section id="bedingungen" class="anchor">
+        <div class="cond-grid">
+          <Panel label="Bedingungen">
+            <div class="conditions" data-wx-conditions></div>
+            <p class="cold-warn" data-wx-cold hidden>
+              <span class="mono-label">Kälte</span>
+              Unter {LIMITS.tempCold} °C bricht die Flugzeit spürbar ein. Akkus in der Jacke
+              warmhalten und erst kurz vor dem Start einsetzen.
+            </p>
+          </Panel>
+
+          <Panel label="Licht" meta="lokal gerechnet">
+            <div class="sun" data-wx-sun></div>
+            <p class="hint">
+              Ohne API berechnet, direkt im Browser. Nachtflug ist in der Open-Kategorie in
+              Deutschland praktisch ausgeschlossen — der Sonnenuntergang ist damit eine harte
+              Grenze, nicht nur eine Lichtfrage.
+            </p>
+          </Panel>
+        </div>
+
+        <Panel label="Kp-Index" meta="geomagnetische Aktivität">
+          <div data-wx-kp></div>
+          <p class="hint">
+            Hohe Werte bedeuten schlechteren GNSS-Empfang. Für Acro im Manual-Modus egal —
+            für Positionshaltung im Normal-Modus und für Return-to-Home nicht.
+          </p>
+        </Panel>
+      </section>
+    </div>
+
+    <!-- Luftraum ---------------------------------------------------------- -->
+    <section id="luftraum" class="anchor">
+      <Panel label="Luftraum" meta="amtliche Quellen" tone="accent">
+        <p class="txt">
+          Hier gibt es bewusst <strong>keine eingebaute Geo-Zonen-Karte</strong>. Ein nachgebauter
+          Layer wäre nur so aktuell wie sein letzter Abgleich und würde eine Sicherheit
+          vortäuschen, die er nicht hat. Die Links unten öffnen die amtlichen Werkzeuge mit den
+          gewählten Koordinaten.
+        </p>
+        <div class="airlinks">
+          <a class="btn" data-wx-link="dipul" href="https://maptool-dipul.dfs.de" target="_blank" rel="noopener noreferrer">dipul Map Tool</a>
+          <a class="btn" data-wx-link="windy" href="https://www.windy.com" target="_blank" rel="noopener noreferrer">Windy</a>
+          <a class="btn" data-wx-link="osm" href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>
+          <a class="btn" data-wx-link="fr24" href="https://www.flightradar24.com" target="_blank" rel="noopener noreferrer">Flightradar24</a>
+          <a class="btn" href="https://www.dwd.de/DE/leistungen/warnwetterapp/warnwetterapp.html" target="_blank" rel="noopener noreferrer">DWD-Warnlage</a>
+          <a class="btn" href="https://www.safesky.app" target="_blank" rel="noopener noreferrer">SafeSky</a>
+        </div>
+        <p class="txt small">
+          <strong>NOTAM</strong> und temporäre Beschränkungen stehen in keiner dieser Quellen
+          vollständig. Bei Großveranstaltungen, Einsätzen oder Übungen gilt: im Zweifel nicht
+          starten.
+        </p>
+      </Panel>
+
+      <Panel label="Spots" meta={`${spots.length} gespeichert`}>
+        {
+          spots.length > 0 ? (
+            <div class="scroll-x">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Gebiet</th>
+                    <th>Typ</th>
+                    <th>dipul geprüft</th>
+                    <th>Koordinaten</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    spotEntries.map((s) => (
+                      <tr>
+                        <td>{s.data.name}</td>
+                        <td class="muted">{s.data.area}</td>
+                        <td class="mono">{s.data.type}</td>
+                        <td class="mono">
+                          {s.data.dipulChecked ? fmtDate(s.data.dipulChecked) : '—'}
+                        </td>
+                        <td class="mono">
+                          {s.data.coordsPublic
+                            ? `${s.data.lat}, ${s.data.lon}`
+                            : `${coarse(s.data.lat)}, ${coarse(s.data.lon)} (gerundet)`}
+                        </td>
+                      </tr>
+                    ))
+                  }
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <EmptyState
+              code="SPT 00"
+              title="Noch keine Spots erfasst"
+              reason="Spots sind Markdown-Dateien in src/content/spots/ mit Name, Gebiet, Koordinaten, Zufahrt und dem Datum der letzten dipul-Prüfung. Sie erscheinen dann in der Auswahl oben und in dieser Tabelle."
+              next="Ersten Spot anlegen — coordsPublic auf false lassen, dann werden die Koordinaten nur gerundet ausgegeben."
+            />
+          )
+        }
+        <p class="txt small">
+          Koordinaten privater Spots werden auf etwa einen Kilometer gerundet ausgegeben. Das
+          Repository ist öffentlich — ein Lost Place gehört nicht metergenau ins Netz.
+        </p>
+      </Panel>
+    </section>
+
+    <Panel label="Haftungsausschluss" tone="alert">
+      <p class="txt">
+        Dieses Briefing ist eine <strong>Ergänzung</strong>, kein Ersatz für dipul, NOTAM und die
+        amtliche Warnlage des DWD. Die Grenzwerte stammen aus dem Datenblatt der Avata 2 und aus
+        eigener Einschätzung, nicht aus einer Vorschrift. Die Entscheidung zu starten trifft der
+        Pilot — nicht diese Seite.
+      </p>
+    </Panel>
+  </div>
+</Base>
+
+<script>
+  import '~/scripts/wetter-client';
+</script>
+
+<style>
+  .anchor {
+    margin-bottom: var(--s5);
+    scroll-margin-top: calc(var(--topbar-h) + var(--tabbar-h) + var(--s4));
+  }
+
+  /* --- Standortwahl --- */
+  .picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--s5);
+    align-items: start;
+  }
+  .p-field { display: grid; gap: var(--s2); }
+  .p-hint { font-size: var(--fs-tiny); color: var(--muted-deep); line-height: var(--lh-snug); }
+
+  select, input {
+    padding: var(--s2) var(--s3);
+    background: var(--panel-sunk);
+    border: 1px solid var(--line-strong);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    width: 100%;
+  }
+  select:focus, input:focus { border-color: var(--accent); outline: none; }
+  .coords { display: flex; gap: var(--s2); flex-wrap: wrap; }
+  .coords input { flex: 1 1 100px; min-width: 90px; }
+
+  .loading { padding: var(--s6) 0; text-align: center; color: var(--accent); }
+  .err { font-size: var(--fs-body); color: var(--armed); }
+  .err-sub { margin-top: var(--s3); font-size: var(--fs-small); color: var(--muted); max-width: 74ch; }
+  .err-actions { margin-top: var(--s5); display: flex; flex-wrap: wrap; gap: var(--s3); }
+
+  /* --- Verdict --- */
+  .verdict-box {
+    position: relative;
+    padding: var(--s6);
+    background: var(--panel);
+    border: 1px solid var(--line-strong);
+    margin-bottom: var(--s3);
+  }
+  .verdict-box[data-verdict='go'] { border-color: color-mix(in srgb, var(--gps) 50%, var(--line)); }
+  .verdict-box[data-verdict='marginal'] { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
+  .verdict-box[data-verdict='nogo'] { border-color: color-mix(in srgb, var(--armed) 50%, var(--line)); }
+
+  .v-tick { position: absolute; width: 10px; height: 10px; border: 0 solid var(--line-strong); }
+  .tl { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; }
+  .br { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; }
+  [data-verdict='go'] .v-tick { border-color: var(--gps); }
+  [data-verdict='marginal'] .v-tick { border-color: var(--accent); }
+  [data-verdict='nogo'] .v-tick { border-color: var(--armed); }
+
+  .v-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--s5);
+    flex-wrap: wrap;
+  }
+  .v-label {
+    margin-top: var(--s2);
+    font-family: var(--font-display);
+    font-size: 3.25rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--muted);
+  }
+  [data-verdict='go'] .v-label { color: var(--gps); }
+  [data-verdict='marginal'] .v-label { color: var(--accent); }
+  [data-verdict='nogo'] .v-label { color: var(--armed); }
+
+  .v-text { margin-top: var(--s3); font-size: var(--fs-small); color: var(--muted); max-width: 46ch; }
+  .v-now {
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+    text-align: right;
+    max-width: 34ch;
+  }
+
+  .rules { list-style: none; margin: var(--s6) 0 0; padding: 0; border-top: 1px solid var(--line); }
+  :global(.rule) {
+    display: grid;
+    grid-template-columns: auto 96px 84px 1fr;
+    align-items: baseline;
+    gap: var(--s3);
+    padding: var(--s3) 0;
+    border-bottom: 1px solid var(--line-faint);
+  }
+  :global(.r-dot) { width: 6px; height: 6px; background: var(--muted-deep); align-self: center; }
+  :global(.s-go .r-dot) { background: var(--gps); }
+  :global(.s-marginal .r-dot) { background: var(--accent); }
+  :global(.s-nogo .r-dot) { background: var(--armed); }
+  :global(.r-label) {
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--tr-mid);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  :global(.r-value) { font-family: var(--font-mono); font-size: var(--fs-small); color: var(--text); }
+  :global(.s-nogo .r-value) { color: var(--armed); }
+  :global(.s-marginal .r-value) { color: var(--accent); }
+  :global(.r-reason) { font-size: var(--fs-small); color: var(--muted); }
+
+  .v-meta { display: block; margin-top: var(--s4); color: var(--muted-deep); }
+
+  /* --- Timeline --- */
+  .timeline :global(svg) { width: 100%; height: 96px; display: block; }
+  :global(.tl-go) { fill: var(--gps); opacity: 0.75; }
+  :global(.tl-marginal) { fill: var(--accent); opacity: 0.75; }
+  :global(.tl-nogo) { fill: var(--armed); opacity: 0.6; }
+  :global(.tl-tick) { stroke: var(--line-strong); stroke-width: 1; }
+  :global(.tl-lbl) { fill: var(--muted); font-family: var(--font-mono); font-size: 10px; }
+  :global(.tl-day) { fill: var(--muted-deep); font-family: var(--font-mono); font-size: 9px; }
+
+  .legend { display: flex; gap: var(--s4); margin-top: var(--s3); flex-wrap: wrap; }
+  .lg {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--tr-mid);
+    color: var(--muted);
+  }
+  .lg::before { content: ''; width: 10px; height: 6px; }
+  .lg.go::before { background: var(--gps); }
+  .lg.marginal::before { background: var(--accent); }
+  .lg.nogo::before { background: var(--armed); }
+  .lg.line-wind::before { height: 2px; background: var(--accent); }
+  .lg.line-gust::before { height: 2px; background: var(--armed); }
+
+  .window { margin-top: var(--s4); font-size: var(--fs-small); color: var(--text-dim); }
+
+  /* --- Wind --- */
+  .wind-grid, .cond-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: var(--s3);
+    margin-bottom: var(--s3);
+    align-items: start;
+  }
+  .wnow { display: flex; gap: var(--s7); flex-wrap: wrap; }
+  .wnow > div { display: grid; gap: var(--s1); }
+  .readout.gust { color: var(--armed); }
+  .unit-lbl { color: var(--muted); }
+  .sub { color: var(--muted-deep); }
+  .wmeta {
+    margin-top: var(--s5);
+    padding-top: var(--s3);
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: var(--s5);
+    flex-wrap: wrap;
+  }
+
+  .rose :global(svg) { width: 100%; max-width: 180px; margin: 0 auto; }
+  :global(.rose-ring) { fill: none; stroke: var(--line); stroke-width: 1; }
+  :global(.rose-spoke) { stroke: var(--line-faint); stroke-width: 1; }
+  :global(.rose-lbl) { fill: var(--muted-deep); font-family: var(--font-mono); font-size: 10px; text-anchor: middle; }
+  :global(.rose-arrow) { stroke: var(--accent); stroke-width: 2; fill: none; }
+  :global(.rose-hub) { fill: var(--accent); }
+
+  .profile { display: grid; gap: var(--s3); }
+  :global(.pf-row) {
+    display: grid;
+    grid-template-columns: 48px 1fr 76px;
+    grid-template-areas: 'label track val' '. note note';
+    gap: var(--s3);
+    align-items: center;
+  }
+  :global(.pf-label) {
+    grid-area: label;
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    color: var(--muted);
+  }
+  :global(.pf-track) {
+    grid-area: track;
+    position: relative;
+    height: 14px;
+    background: var(--panel-sunk);
+    border: 1px solid var(--line);
+  }
+  :global(.pf-bar) { position: absolute; inset: 0 auto 0 0; background: var(--gps); opacity: 0.8; }
+  :global(.pf-bar.s-marginal) { background: var(--accent); }
+  :global(.pf-bar.s-nogo) { background: var(--armed); }
+  :global(.pf-mark) { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--line-strong); z-index: 1; }
+  :global(.pf-mark.hard) { background: var(--armed); }
+  :global(.pf-val) {
+    grid-area: val;
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    text-align: right;
+    color: var(--text);
+  }
+  :global(.pf-note) { grid-area: note; font-size: var(--fs-tiny); color: var(--muted-deep); }
+
+  .trend :global(svg) { width: 100%; height: auto; display: block; }
+  :global(.tr-wind) { stroke: var(--accent); stroke-width: 1.5; fill: none; }
+  :global(.tr-gust) { stroke: var(--armed); stroke-width: 1.5; fill: none; stroke-dasharray: 3 3; }
+  :global(.tr-limit) { stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 2 4; }
+  :global(.tr-limit.hard) { stroke: color-mix(in srgb, var(--armed) 60%, transparent); }
+  :global(.tr-lbl) { fill: var(--muted-deep); font-family: var(--font-mono); font-size: 10px; }
+
+  /* --- Bedingungen --- */
+  .conditions { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  :global(.cond) { background: var(--panel-sunk); padding: var(--s3) var(--s4); display: grid; grid-template-columns: 1fr auto auto; gap: var(--s3); align-items: baseline; }
+  :global(.c-key) { font-size: var(--fs-small); color: var(--muted); }
+  :global(.c-val) { font-family: var(--font-mono); font-size: var(--fs-small); color: var(--text); }
+  :global(.c-note) { font-family: var(--font-mono); font-size: var(--fs-micro); color: var(--muted-deep); }
+
+  .cold-warn {
+    margin-top: var(--s4);
+    padding: var(--s3) var(--s4);
+    border-left: 2px solid var(--accent);
+    background: var(--accent-wash);
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sun { display: grid; }
+  :global(.sun-row) {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: 'key val' 'note note';
+    gap: 0 var(--s3);
+    padding: var(--s2) 0;
+    border-bottom: 1px solid var(--line-faint);
+  }
+  :global(.s-key) { grid-area: key; font-size: var(--fs-small); color: var(--text-dim); }
+  :global(.s-val) { grid-area: val; font-family: var(--font-mono); font-size: var(--fs-small); color: var(--accent); }
+  :global(.s-note) { grid-area: note; font-size: var(--fs-tiny); color: var(--muted-deep); }
+
+  /* --- Kp --- */
+  :global(.kp) { display: grid; gap: var(--s3); }
+  :global(.kp-val) { font-family: var(--font-mono); font-size: var(--fs-readout); line-height: 1; color: var(--gps); }
+  :global(.kp.s-marginal .kp-val) { color: var(--accent); }
+  :global(.kp.s-nogo .kp-val) { color: var(--armed); }
+  :global(.kp-scale) { display: flex; gap: 3px; }
+  :global(.kp-scale span) { width: 100%; height: 8px; background: var(--panel-hi); border: 1px solid var(--line); }
+  :global(.kp-scale span.on) { background: var(--gps); border-color: var(--gps); }
+  :global(.kp.s-marginal .kp-scale span.on) { background: var(--accent); border-color: var(--accent); }
+  :global(.kp.s-nogo .kp-scale span.on) { background: var(--armed); border-color: var(--armed); }
+  :global(.kp-text) { font-size: var(--fs-small); color: var(--muted); }
+  :global(.kp-at) { color: var(--muted-deep); }
+  :global(.kp-out) { font-size: var(--fs-small); color: var(--muted); }
+
+  /* --- Luftraum --- */
+  .airlinks { margin: var(--s5) 0; display: flex; flex-wrap: wrap; gap: var(--s3); }
+  .txt { font-size: var(--fs-small); color: var(--muted); max-width: 78ch; }
+  .txt.small { margin-top: var(--s4); font-size: var(--fs-tiny); }
+  .hint { margin-top: var(--s4); font-size: var(--fs-tiny); color: var(--muted-deep); max-width: 76ch; line-height: var(--lh-snug); }
+  .hint.warn { color: var(--muted); }
+  .muted { color: var(--muted); }
+  .mono { font-family: var(--font-mono); font-size: var(--fs-micro); white-space: nowrap; }
+
+  @media (max-width: 900px) {
+    .wind-grid, .cond-grid { grid-template-columns: 1fr; }
+    .v-now { text-align: left; }
+    :global(.rule) { grid-template-columns: auto 1fr auto; grid-template-areas: 'dot label value' '. reason reason'; }
+    :global(.r-dot) { grid-area: dot; }
+    :global(.r-label) { grid-area: label; }
+    :global(.r-value) { grid-area: value; }
+    :global(.r-reason) { grid-area: reason; }
+  }
+</style>

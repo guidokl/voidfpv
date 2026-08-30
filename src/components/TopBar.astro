@@ -1,0 +1,102 @@
+---
+import StatusLed from './StatusLed.astro';
+import { getLedStates } from '~/lib/stats';
+import { href } from '~/lib/format';
+
+interface Props {
+  /** Gruppenname links, z. B. "Einsatz" */
+  group?: string;
+  /** Seitenname, z. B. "Wetter" */
+  title: string;
+}
+const { group, title } = Astro.props;
+const leds = await getLedStates();
+---
+
+<header class="topbar">
+  <button class="burger" type="button" data-nav-toggle aria-expanded="false" aria-controls="rail">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="sr-only">Navigation umschalten</span>
+  </button>
+
+  <nav class="crumbs" aria-label="Brotkrumen">
+    <a href={href('/')}>VOID</a>
+    {group && <span class="sep">/</span>}
+    {group && <span class="grp">{group}</span>}
+    <span class="sep">/</span>
+    <span class="now">{title}</span>
+  </nav>
+
+  <a class="leds" href={href('/papierkram')} title="Stand der Formalitäten — zum Papierkram">
+    {leds.map((l) => <StatusLed state={l.state} label={l.short} />)}
+  </a>
+</header>
+
+<style>
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-topbar);
+    height: var(--topbar-h);
+    display: flex;
+    align-items: center;
+    gap: var(--s4);
+    padding: 0 var(--s5);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .crumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .crumbs a { color: var(--muted); border-bottom: none; }
+  .crumbs a:hover { color: var(--accent); }
+  .sep { color: var(--muted-deep); }
+  .grp { color: var(--muted); }
+  .now { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .leds {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--s4);
+    border-bottom: none;
+    padding: var(--s2) 0;
+  }
+  .leds:hover { border-bottom: none; }
+
+  .burger { display: none; }
+
+  @media (max-width: 900px) {
+    .topbar { padding: 0 var(--s4); gap: var(--s3); }
+    .burger {
+      display: grid;
+      place-items: center;
+      width: 28px; height: 28px;
+      margin-left: calc(var(--s2) * -1);
+      border: 1px solid var(--line-strong);
+      flex: none;
+    }
+    .burger[aria-expanded='true'] { border-color: var(--accent); }
+    .bars { display: grid; gap: 3px; }
+    .bars i { display: block; width: 12px; height: 1px; background: var(--text-dim); }
+    .burger[aria-expanded='true'] .bars i { background: var(--accent); }
+  }
+
+  /* Auf sehr schmalen Screens nur die LEDs, keine Kuerzel */
+  @media (max-width: 640px) {
+    .leds { gap: var(--s3); }
+    .leds :global(.led-label) { display: none; }
+    .grp, .crumbs a { display: none; }
+    .crumbs .sep:first-of-type { display: none; }
+  }
+</style>

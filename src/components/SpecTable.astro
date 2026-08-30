@@ -1,0 +1,69 @@
+---
+/**
+ * Datenblatt-Zeilen mit gepunkteter Fuehrungslinie zwischen Bezeichnung und Wert.
+ * Werte duerfen Markdown-freies HTML nicht enthalten — bewusst Klartext.
+ */
+interface Props {
+  rows: Record<string, string> | [string, string][];
+  /** Hebt einzelne Werte in Amber hervor (Schluesselnamen) */
+  highlight?: string[];
+  dense?: boolean;
+}
+const { rows, highlight = [], dense = false } = Astro.props;
+const entries: [string, string][] = Array.isArray(rows) ? rows : Object.entries(rows);
+---
+
+<dl class:list={['specs', dense && 'is-dense']}>
+  {
+    entries.map(([k, v]) => (
+      <div class:list={['row', highlight.includes(k) && 'is-hl']}>
+        <dt>{k}</dt>
+        <span class="leader" aria-hidden="true"></span>
+        <dd>{v}</dd>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .specs { display: flex; flex-direction: column; }
+  .row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: baseline;
+    gap: var(--s2);
+    padding: var(--s3) 0;
+    border-bottom: 1px solid var(--line-faint);
+  }
+  .is-dense .row { padding: var(--s2) 0; }
+  .row:last-child { border-bottom: none; }
+
+  dt {
+    font-size: var(--fs-small);
+    color: var(--muted);
+  }
+  dd {
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    color: var(--text);
+    text-align: right;
+  }
+  .is-hl dd { color: var(--accent); }
+
+  /* Gepunktete Fuehrungslinie */
+  .leader {
+    align-self: center;
+    height: 1px;
+    min-width: var(--s4);
+    background-image: linear-gradient(to right, var(--line-strong) 1px, transparent 1px);
+    background-size: 4px 1px;
+    background-repeat: repeat-x;
+    opacity: 0.7;
+  }
+
+  @media (max-width: 520px) {
+    .row { grid-template-columns: 1fr; gap: 0; }
+    .leader { display: none; }
+    dd { text-align: left; margin-top: 2px; }
+  }
+</style>

@@ -1,0 +1,81 @@
+[
+  {
+    "id": "props-3032s",
+    "name": "DJI Propeller 3032S — 2–3 Ersatzsets",
+    "category": "ersatzteil",
+    "priceEur": 12,
+    "status": "wunsch",
+    "url": "https://www.fpv24.com",
+    "note": "Verbrauchsmaterial Nummer eins. CW und CCW nicht verwechseln. Vor dem ersten Waldakku da haben, nicht danach."
+  },
+  {
+    "id": "microsd",
+    "name": "microSD U3/V30, 128 GB",
+    "category": "ersatzteil",
+    "priceEur": 20,
+    "status": "wunsch",
+    "note": "Keine Billigkarte — 4K/100 schreibt schnell. Zweite Karte als Reserve mitnehmen."
+  },
+  {
+    "id": "powerbank",
+    "name": "Powerbank mit USB-C PD",
+    "category": "werkzeug",
+    "priceEur": 35,
+    "status": "beobachten",
+    "note": "Verlängert die Goggles über eine ganze Session und lädt notfalls die Akkus im Hub nach."
+  },
+  {
+    "id": "nd-filter",
+    "name": "ND-Filterset ND8/16/32",
+    "category": "ersatzteil",
+    "priceEur": 45,
+    "status": "beobachten",
+    "note": "Erst bei Sonne relevant. Im Herbst- und Winterwald bleibt das Set in der Tasche."
+  },
+  {
+    "id": "loetstation",
+    "name": "Lötstation, temperaturgeregelt",
+    "category": "werkzeug",
+    "priceEur": 80,
+    "status": "wunsch",
+    "note": "Voraussetzung für alles ab PNP. Meißelspitze, geregelt, kein 15-€-Kolben — kalte Lötstellen kosten später mehr."
+  },
+  {
+    "id": "smoke-stopper",
+    "name": "Smoke Stopper",
+    "category": "werkzeug",
+    "priceEur": 15,
+    "status": "wunsch",
+    "note": "Begrenzt den Strom beim ersten Einschalten nach dem Löten. Rettet beim ersten Kurzschluss einen kompletten Stack."
+  },
+  {
+    "id": "lipo-checker",
+    "name": "LiPo-Checker / Zellenspannungsprüfer",
+    "category": "werkzeug",
+    "priceEur": 12,
+    "status": "wunsch",
+    "note": "Erst mit eigenen LiPos nötig. Die DJI-Akkus melden ihren Zustand selbst."
+  },
+  {
+    "id": "lipo-lader",
+    "name": "LiPo-Ladegerät mit Balancer",
+    "category": "akku",
+    "priceEur": 90,
+    "status": "beobachten",
+    "note": "Kommt mit dem ersten 3\"- oder 5\"-Modell. Vorher nicht nötig, weil die Avata über ihren Hub lädt."
+  },
+  {
+    "id": "nazgul-klasse",
+    "name": "BNF-Freestyle 5\" mit DJI-Air-Unit (Nazgul-Klasse)",
+    "category": "drohne",
+    "status": "beobachten",
+    "note": "Der eigentliche nächste Schritt: fertig gebaut und gebunden, fliegt mit den vorhandenen Goggles 3. Vor dem Kauf Kompatibilität von Air Unit, Brille und Sender in der jeweils aktuellen Firmware prüfen."
+  },
+  {
+    "id": "kleines-3zoll",
+    "name": "3\"-Modell für enge Spots",
+    "category": "drohne",
+    "status": "wunsch",
+    "note": "Leiser, billiger im Crash, passt in Lücken, die ein 5\" nicht nimmt. Als Zweitgerät interessanter als ein zweites 5\"."
+  }
+]

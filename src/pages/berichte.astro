@@ -1,0 +1,146 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import EmptyState from '~/components/EmptyState.astro';
+import { href, fmtDate } from '~/lib/format';
+
+const all = (await getCollection('posts'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const echte = all.filter((p) => !p.data.template);
+const tags = [...new Set(all.flatMap((p) => p.data.tags))].sort();
+---
+
+<Base
+  title="Berichte"
+  description="Längere Texte zum FPV-Einstieg: Session-Berichte, Lost Places, Lernkurven und Fehlschläge mit Erkenntnis."
+  path="/berichte"
+>
+  <SectionHead
+    index="08"
+    title="Berichte"
+    lead="Die lange Form: eine ganze Session, ein Ort, eine Lernkurve. Auch die Fehlschläge — die sind später die nützlichsten Einträge."
+    meta={echte.length > 0 ? `${echte.length} Berichte` : 'noch keiner'}
+  />
+
+  {
+    echte.length === 0 && (
+      <Panel label="Status" meta="Pre-Flight">
+        <EmptyState
+          code="RPT 00"
+          title="Noch kein Bericht"
+          reason="Berichte entstehen nach Sessions. Bis die Drohne da ist, wandert alles Wissenswerte in die Wissensbasis statt hierher — dort steht es sortiert, nicht chronologisch."
+          next="Der erste Bericht wird vermutlich die Simulator-Anfangsphase: was in den ersten Stunden wirklich schwer war."
+        >
+          <div class="empty-actions">
+            <a class="btn" href={href('/wissen')}>Zur Wissensbasis</a>
+            <a class="btn" href={href('/sim')}>Sim-Logbuch</a>
+          </div>
+        </EmptyState>
+      </Panel>
+    )
+  }
+
+  {
+    all.length > 0 && (
+      <div class="list">
+        {
+          all.map((p) => (
+            <article class={`item ${p.data.template ? 'is-tpl' : ''}`}>
+              <div class="meta">
+                <time class="mono-label" datetime={p.data.date.toISOString()}>
+                  {fmtDate(p.data.date)}
+                </time>
+                {p.data.template && <span class="tpl-tag">Vorlage</span>}
+              </div>
+              <div class="content">
+                <h2>
+                  <a href={href(`/berichte/${p.id}`)}>{p.data.title}</a>
+                </h2>
+                <p class="excerpt">{p.data.excerpt}</p>
+                {p.data.tags.length > 0 && (
+                  <div class="tags">
+                    {p.data.tags.map((t) => (
+                      <span class="tag">{t}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    )
+  }
+
+  <Panel label="Abgrenzung">
+    <p class="txt">
+      <strong>Berichte</strong> sind ausformulierte Texte mit Aufbau. Das
+      <strong> Flugbuch</strong> ist die Datenzeile zu einem Flug. Die
+      <strong> Galerie</strong> zeigt Material ohne Text drumherum. Ein kurzer Journal-Bereich
+      für den Zettel dazwischen steht in <code>TODO.md</code> und kommt später.
+    </p>
+    {tags.length > 0 && (
+      <p class="txt small">Vorhandene Tags: {tags.join(', ')}</p>
+    )}
+  </Panel>
+</Base>
+
+<style>
+  .empty-actions {
+    margin-top: var(--s5);
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--s3);
+  }
+
+  .list { display: grid; margin-bottom: var(--s5); }
+  .item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: var(--s5);
+    padding: var(--s5) 0;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+  .item:first-child { border-top: 1px solid var(--line); }
+  .is-tpl { opacity: 0.72; }
+
+  .meta { display: grid; gap: var(--s2); justify-items: start; }
+  .tpl-tag {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 1px 5px;
+  }
+
+  h2 { font-size: var(--fs-h3); }
+  h2 a { color: var(--text); border-bottom-color: transparent; }
+  h2 a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  .excerpt { margin-top: var(--s2); max-width: 70ch; font-size: var(--fs-small); color: var(--muted); }
+
+  .tags { margin-top: var(--s3); display: flex; gap: var(--s2); flex-wrap: wrap; }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.04em;
+    color: var(--muted-deep);
+    border: 1px solid var(--line);
+    padding: 1px 5px;
+  }
+
+  .txt { font-size: var(--fs-small); color: var(--muted); max-width: 74ch; }
+  .txt.small { margin-top: var(--s3); font-family: var(--font-mono); font-size: var(--fs-micro); }
+
+  @media (max-width: 700px) {
+    .item { grid-template-columns: 1fr; gap: var(--s3); }
+    .meta { flex-direction: row; display: flex; gap: var(--s3); align-items: center; }
+  }
+</style>

@@ -1,0 +1,328 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import { fmtDate } from '~/lib/format';
+
+const pilots = (await getCollection('pilots')).sort((a, b) => a.data.order - b.data.order);
+const films = (await getCollection('films')).sort((a, b) => a.data.order - b.data.order);
+
+const clips = films.filter((f) => f.data.kind === 'clip');
+const longform = films.filter((f) => f.data.kind !== 'clip');
+
+const DISCIPLINE = {
+  freestyle: 'Freestyle',
+  racing: 'Racing',
+  cinematic: 'Cinematic',
+  education: 'Erklären',
+  crew: 'Crew & Serie',
+};
+
+const GROUPS = [
+  { id: 'cinematic', label: 'Cinematic', note: 'Die Bildsprache, die FPV aus der Nische geholt hat.' },
+  { id: 'freestyle', label: 'Freestyle', note: 'Der Kern der Szene — Linien, Bandos, Bäume.' },
+  { id: 'racing', label: 'Racing', note: 'Wiederholbarkeit unter Zeitdruck.' },
+  { id: 'education', label: 'Erklären', note: 'Praktisch am nützlichsten für den eigenen Einstieg.' },
+  { id: 'crew', label: 'Crew & Serien', note: 'Kanäle, die die Szene abbilden statt nur zu fliegen.' },
+] as const;
+
+const host = (u: string) => new URL(u).hostname.replace(/^www\./, '');
+---
+
+<Base
+  title="Legenden"
+  description="Piloten, legendäre Clips und Filme, die FPV geprägt haben — kuratiert, mit Begründung und ohne automatische Einbettung."
+  path="/legenden"
+>
+  <SectionHead
+    index="13"
+    title="Piloten & Legenden"
+    lead="Kein Fan-Wiki, sondern eine Auswahl mit Begründung: wer die Bildsprache geprägt hat, welche Aufnahmen den Sport definiert haben und was sich technisch daran ablesen lässt."
+    meta={`${pilots.length} Piloten · ${films.length} Werke`}
+  />
+
+  <Panel label="Zu dieser Seite" meta="zwei Klicks statt Tracking">
+    <div class="two">
+      <p class="txt">
+        Alle Namen, Titel, Jahreszahlen und Links sind beim Eintragen einzeln überprüft worden
+        und tragen ein Prüfdatum. Was sich nicht bestätigen ließ, steht nicht hier — auch wenn
+        es zur Geschichte gut gepasst hätte.
+      </p>
+      <p class="txt">
+        Es gibt <strong>keine eingebetteten Videos</strong>. Ein YouTube-Player würde beim
+        Laden der Seite Daten an Google senden, ohne dass jemand ein Video sehen wollte. Die
+        Karten unten sind Links: Ein Klick öffnet das Video in einem neuen Tab, vorher passiert
+        nichts.
+      </p>
+    </div>
+  </Panel>
+
+  <section id="piloten" class="anchor">
+    <h2 class="sec-h">Piloten</h2>
+    {
+      GROUPS.map((g) => {
+        const list = pilots.filter((p) => p.data.discipline === g.id);
+        if (!list.length) return null;
+        return (
+          <div class="group">
+            <div class="g-head">
+              <span class="mono-label">{g.label}</span>
+              <span class="g-note">{g.note}</span>
+            </div>
+            <div class="cards">
+              {list.map((p) => (
+                <article class="pilot">
+                  <span class="tick" aria-hidden="true" />
+                  <header>
+                    <h3>{p.data.name}</h3>
+                    <span class="disc mono-label">{DISCIPLINE[p.data.discipline]}</span>
+                    {p.data.country && <span class="country mono-label">{p.data.country}</span>}
+                  </header>
+                  <p class="why">{p.data.why}</p>
+                  {p.data.refs.length > 0 && (
+                    <ul class="refs">
+                      {p.data.refs.map((r) => (
+                        <li>{r}</li>
+                      ))}
+                    </ul>
+                  )}
+                  <footer>
+                    <a
+                      class="btn"
+                      href={p.data.channelUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {host(p.data.channelUrl)} &nearr;
+                    </a>
+                    <span class="ver mono-label">geprüft {fmtDate(p.data.verified)}</span>
+                  </footer>
+                </article>
+              ))}
+            </div>
+          </div>
+        );
+      })
+    }
+  </section>
+
+  <section id="clips" class="anchor">
+    <h2 class="sec-h">Legendäre Clips</h2>
+    <p class="sec-lead">
+      Aufnahmen, die über die Szene hinaus gewirkt haben — jeweils mit dem, was technisch
+      dahintersteckt.
+    </p>
+    <div class="works">
+      {
+        clips.map((f) => (
+          <article class="work">
+            <span class="tick tl" aria-hidden="true" />
+            <span class="tick br" aria-hidden="true" />
+            <div class="w-head">
+              <span class="w-year mono-label">{f.data.year}</span>
+              <div>
+                <h3>{f.data.title}</h3>
+                <span class="w-by mono-label">{f.data.by}</span>
+              </div>
+            </div>
+            <p class="w-why">{f.data.why}</p>
+            {f.data.learn && (
+              <p class="w-learn">
+                <span class="mono-label">Was man daran sieht</span>
+                {f.data.learn}
+              </p>
+            )}
+            <footer>
+              <a class="btn play" href={f.data.url} target="_blank" rel="noopener noreferrer">
+                <span class="tri" aria-hidden="true" />
+                Auf {host(f.data.url)} ansehen
+              </a>
+              <span class="ver mono-label">geprüft {fmtDate(f.data.verified)}</span>
+            </footer>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section id="filme" class="anchor">
+    <h2 class="sec-h">Filme & Dokus</h2>
+    <p class="sec-lead">Längeres Format — für Abende, an denen der Wind zu stark ist.</p>
+    <div class="works">
+      {
+        longform.map((f) => (
+          <article class="work is-long">
+            <span class="tick tl" aria-hidden="true" />
+            <span class="tick br" aria-hidden="true" />
+            <div class="w-head">
+              <span class="w-year mono-label">{f.data.year}</span>
+              <div>
+                <h3>{f.data.title}</h3>
+                <span class="w-by mono-label">
+                  {f.data.by} · {f.data.kind === 'doc' ? 'Dokumentation' : 'Film'}
+                </span>
+              </div>
+            </div>
+            <p class="w-why">{f.data.why}</p>
+            {f.data.learn && (
+              <p class="w-learn">
+                <span class="mono-label">Wofür es taugt</span>
+                {f.data.learn}
+              </p>
+            )}
+            <footer>
+              <a class="btn play" href={f.data.url} target="_blank" rel="noopener noreferrer">
+                <span class="tri" aria-hidden="true" />
+                Auf {host(f.data.url)} ansehen
+              </a>
+              <span class="ver mono-label">geprüft {fmtDate(f.data.verified)}</span>
+            </footer>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <Panel label="Wächst mit">
+    <p class="txt">
+      Die Liste ist bewusst kurz gehalten und enthält nur Geprüftes. Neue Einträge kommen nach
+      <code>src/content/pilots.json</code> beziehungsweise <code>src/content/films.json</code> —
+      mit Link, Jahr, Begründung und Prüfdatum. Eine Empfehlung ohne Begründung ist nur eine
+      Linkliste.
+    </p>
+  </Panel>
+</Base>
+
+<style>
+  .anchor {
+    margin: var(--s8) 0 var(--s5);
+    scroll-margin-top: calc(var(--topbar-h) + var(--tabbar-h) + var(--s4));
+  }
+  .sec-h {
+    font-size: var(--fs-h2);
+    padding-bottom: var(--s3);
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .sec-lead {
+    margin-top: var(--s3);
+    font-size: var(--fs-small);
+    color: var(--muted);
+    max-width: 72ch;
+  }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
+  .txt { font-size: var(--fs-small); color: var(--muted); max-width: 72ch; }
+
+  /* --- Piloten --- */
+  .group { margin-top: var(--s6); }
+  .g-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s3);
+    flex-wrap: wrap;
+    padding-bottom: var(--s3);
+  }
+  .g-note { font-size: var(--fs-tiny); color: var(--muted-deep); }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--s3);
+  }
+  .pilot {
+    position: relative;
+    padding: var(--s4) var(--s5);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+  }
+  .pilot .tick {
+    position: absolute;
+    left: -1px; top: -1px; bottom: -1px;
+    width: 2px;
+    background: var(--line-strong);
+  }
+  .pilot:hover .tick { background: var(--accent); }
+
+  .pilot header { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; }
+  .pilot h3 { font-size: var(--fs-h3); }
+  .disc { color: var(--accent); }
+  .country { color: var(--muted-deep); margin-left: auto; }
+
+  .why { margin-top: var(--s3); font-size: var(--fs-small); color: var(--muted); flex: 1; }
+
+  .refs { list-style: none; margin: var(--s3) 0 0; padding: 0; }
+  .refs li {
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    color: var(--text-dim);
+    padding: 2px 0 2px var(--s3);
+    position: relative;
+  }
+  .refs li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0.72em;
+    width: 6px; height: 1px;
+    background: var(--accent);
+  }
+
+  footer {
+    margin-top: var(--s4);
+    padding-top: var(--s3);
+    border-top: 1px solid var(--line-faint);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s3);
+    flex-wrap: wrap;
+  }
+  .ver { color: var(--muted-deep); }
+
+  /* --- Werke --- */
+  .works { display: grid; gap: var(--s3); margin-top: var(--s5); }
+  .work {
+    position: relative;
+    padding: var(--s5);
+    background: var(--panel);
+    border: 1px solid var(--line);
+  }
+  .work .tick { position: absolute; width: 8px; height: 8px; border: 0 solid var(--line-strong); }
+  .tl { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; }
+  .br { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; }
+  .work:hover .tick { border-color: var(--accent); }
+  .is-long { border-left: 2px solid var(--accent); }
+
+  .w-head { display: grid; grid-template-columns: auto 1fr; gap: var(--s4); align-items: baseline; }
+  .w-year { color: var(--accent); }
+  .work h3 { font-size: var(--fs-h3); }
+  .w-by { display: block; margin-top: 2px; color: var(--muted-deep); }
+
+  .w-why { margin-top: var(--s4); font-size: var(--fs-small); color: var(--text-dim); max-width: 82ch; }
+  .w-learn {
+    margin-top: var(--s4);
+    padding: var(--s3) var(--s4);
+    background: var(--panel-sunk);
+    border-left: 2px solid var(--line-strong);
+    font-size: var(--fs-small);
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-width: 82ch;
+  }
+
+  .play { gap: var(--s3); }
+  .tri {
+    width: 0; height: 0;
+    border-left: 7px solid currentColor;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+
+  @media (max-width: 820px) {
+    .two { grid-template-columns: 1fr; gap: var(--s3); }
+    .country { margin-left: 0; }
+  }
+</style>

@@ -1,0 +1,143 @@
+---
+import { LERNPFAD } from '~/data/lernpfad';
+
+const stateLabel = { active: 'läuft', next: 'als Nächstes', later: 'später' };
+---
+
+<ol class="stepper">
+  {
+    LERNPFAD.map((p) => (
+      <li class={`step s-${p.state}`} id={p.id}>
+        <div class="marker" aria-hidden="true">
+          <span class="dot" />
+        </div>
+
+        <div class="content">
+          <header>
+            <span class="idx">{p.index}</span>
+            <h3>{p.title}</h3>
+            <span class="scope mono-label">{p.scope}</span>
+            <span class={`state st-${p.state}`}>{stateLabel[p.state]}</span>
+          </header>
+
+          <p class="goal">{p.goal}</p>
+
+          <ul class="steps">
+            {p.steps.map((s) => (
+              <li>{s}</li>
+            ))}
+          </ul>
+
+          <p class="done">
+            <span class="mono-label">Sitzt, wenn</span>
+            {p.done}
+          </p>
+        </div>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .stepper { list-style: none; margin: 0; padding: 0; }
+
+  .step {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: var(--s4);
+    position: relative;
+    padding-bottom: var(--s6);
+  }
+  /* Durchgehende Linie zwischen den Phasen */
+  .step:not(:last-child) .marker::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 18px;
+    bottom: calc(var(--s6) * -1 + 8px);
+    width: 1px;
+    background: var(--line-strong);
+    transform: translateX(-50%);
+  }
+  .step:last-child { padding-bottom: 0; }
+
+  .marker { position: relative; display: flex; justify-content: center; padding-top: 6px; }
+  .dot {
+    width: 9px;
+    height: 9px;
+    background: var(--bg);
+    border: 1px solid var(--muted-deep);
+    z-index: 1;
+  }
+  .s-active .dot { background: var(--accent); border-color: var(--accent); }
+  .s-next .dot { border-color: var(--accent); }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s3);
+    flex-wrap: wrap;
+  }
+  .idx {
+    font-family: var(--font-mono);
+    font-size: var(--fs-tiny);
+    color: var(--muted-deep);
+  }
+  .s-active .idx { color: var(--accent); }
+  h3 { font-size: var(--fs-h3); }
+  .scope { color: var(--muted-deep); }
+
+  .state {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border: 1px solid currentColor;
+  }
+  .st-active { color: var(--accent); }
+  .st-next { color: var(--muted); }
+  .st-later { color: var(--muted-deep); }
+
+  .goal { margin-top: var(--s2); color: var(--muted); font-size: var(--fs-small); }
+
+  .steps {
+    margin-top: var(--s4);
+    padding-left: 0;
+    list-style: none;
+    border-left: 1px solid var(--line);
+  }
+  .steps li {
+    position: relative;
+    padding: var(--s2) 0 var(--s2) var(--s4);
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+  }
+  .steps li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1.05em;
+    width: 8px;
+    height: 1px;
+    background: var(--line-strong);
+  }
+
+  .done {
+    margin-top: var(--s4);
+    padding: var(--s3) var(--s4);
+    background: var(--panel-sunk);
+    border-left: 2px solid var(--line-strong);
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .s-active .done { border-left-color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .state { margin-left: 0; }
+  }
+</style>

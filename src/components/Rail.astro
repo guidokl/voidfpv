@@ -1,0 +1,200 @@
+---
+import { NAV } from '~/lib/nav';
+import { href, isActive, fmtDuration, fmtIso } from '~/lib/format';
+import { getStats } from '~/lib/stats';
+
+const stats = await getStats();
+const current = Astro.url.pathname;
+---
+
+<nav class="rail" id="rail" aria-label="Hauptnavigation">
+  <a class="brand" href={href('/')}>
+    <span class="brand-mark">VOID<span class="slash">//</span>FPV</span>
+    <span class="brand-sub">Avata 2 · Einstieg 2026</span>
+  </a>
+
+  <div class="groups">
+    {
+      NAV.map((group) => (
+        <div class="group">
+          <div class="group-label">{group.label}</div>
+          <ul>
+            {group.items.map((item) => {
+              const active = isActive(current, item.path);
+              return (
+                <li>
+                  <a
+                    href={href(item.path)}
+                    class:list={['item', active && 'is-active']}
+                    aria-current={active ? 'page' : undefined}
+                    title={item.blurb}
+                  >
+                    <span class="idx">{item.index}</span>
+                    <span class="label">{item.label}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="rail-foot">
+    <div class="foot-row"><span>Flüge</span><b>{stats.flights}</b></div>
+    <div class="foot-row"><span>Sim</span><b>{fmtDuration(stats.simMinutes)}</b></div>
+    <div class="foot-row"><span>Papiere</span><b>{stats.legal.done}/{stats.legal.total}</b></div>
+    <div class="foot-row build"><span>Build</span><b>{fmtIso(stats.buildDate)}</b></div>
+  </div>
+</nav>
+
+<style>
+  .rail {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--rail-w);
+    z-index: var(--z-rail);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-deep);
+    border-right: 1px solid var(--line);
+  }
+
+  /* --- Brand --- */
+  .brand {
+    display: block;
+    padding: var(--s4) var(--s5);
+    border-bottom: 1px solid var(--line);
+    border-bottom-style: solid;
+    color: var(--text);
+  }
+  .brand:hover { border-bottom-color: var(--line); }
+  .brand-mark {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.0625rem;
+    letter-spacing: 0.02em;
+  }
+  .slash { color: var(--accent); margin: 0 0.1em; }
+  .brand-sub {
+    display: block;
+    margin-top: 3px;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--tr-mid);
+    text-transform: uppercase;
+    color: var(--muted-deep);
+  }
+
+  /* --- Gruppen --- */
+  .groups {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--s4) 0 var(--s5);
+    scrollbar-width: thin;
+  }
+  .group + .group { margin-top: var(--s5); }
+  .group-label {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    padding: 0 var(--s5) var(--s2);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    color: var(--muted-deep);
+  }
+  .group-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line-faint);
+  }
+  ul { list-style: none; margin: 0; padding: 0; }
+
+  .item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    padding: 7px var(--s5);
+    border-bottom: none;
+    color: var(--muted);
+    transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+  }
+  .item:hover { color: var(--text); background: var(--panel-hi); }
+
+  .idx {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.06em;
+    color: var(--muted-deep);
+    padding: 2px 3px;
+    min-width: 20px;
+    text-align: center;
+    transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+  }
+  .label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-tiny);
+    letter-spacing: var(--tr-mid);
+    text-transform: uppercase;
+  }
+
+  /* Aktiver Eintrag: Amber-Balken links, invertierter Index-Chip */
+  .item.is-active {
+    color: var(--text);
+    background: var(--accent-wash);
+  }
+  .item.is-active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--accent);
+  }
+  .item.is-active .idx {
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+  }
+
+  /* --- Fuss: berechnete Telemetrie --- */
+  .rail-foot {
+    border-top: 1px solid var(--line);
+    padding: var(--s3) var(--s5) var(--s4);
+    background: var(--bg-deep);
+  }
+  .foot-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--s2);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--tr-mid);
+    text-transform: uppercase;
+    padding: 2px 0;
+    color: var(--muted-deep);
+  }
+  .foot-row b { color: var(--text-dim); font-weight: 500; }
+  .foot-row.build b { color: var(--muted-deep); }
+
+  /* Mobile: Rail wird zum Drawer. Der Zustand hängt als Klasse am Element selbst —
+     ein :global(body.nav-open)-Selektor über die Komponentengrenze hinweg greift
+     durch das Scoping nicht zuverlässig. */
+  @media (max-width: 900px) {
+    .rail {
+      transform: translateX(-100%);
+      transition: transform var(--dur) var(--ease);
+      width: min(280px, 82vw);
+      z-index: var(--z-drawer);
+      box-shadow: 1px 0 0 var(--line-strong);
+    }
+    .rail.is-open { transform: translateX(0); }
+  }
+</style>

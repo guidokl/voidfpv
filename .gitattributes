@@ -1,0 +1,33 @@
+# Einheitliche Zeilenenden im Repo (Windows-Checkout bleibt CRLF-tauglich)
+* text=auto eol=lf
+
+*.md   text
+*.mdx  text
+*.astro text
+*.ts   text
+*.js   text
+*.mjs  text
+*.json text
+*.css  text
+*.yml  text
+*.yaml text
+*.svg  text
+
+# Binaerdateien
+*.woff2 binary
+*.woff  binary
+*.ttf   binary
+*.otf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.webp  binary
+*.avif  binary
+*.gif   binary
+*.ico   binary
+*.mp4   binary
+*.mov   binary
+*.pdf   binary
+
+# Weniger Diff-Rauschen
+package-lock.json -diff linguist-generated

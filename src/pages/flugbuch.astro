@@ -1,0 +1,171 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import SectionHead from '~/components/SectionHead.astro';
+import Panel from '~/components/Panel.astro';
+import StatTile from '~/components/StatTile.astro';
+import EmptyState from '~/components/EmptyState.astro';
+import { getStats } from '~/lib/stats';
+import { href, fmtDate, fmtDuration } from '~/lib/format';
+
+const stats = await getStats();
+const all = (await getCollection('flights')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+const flights = all.filter((f) => !f.data.template);
+const vorlage = all.find((f) => f.data.template);
+
+const MODE_LABEL = { N: 'Normal', S: 'Sport', M: 'Manual', 'Easy ACRO': 'Easy ACRO' };
+---
+
+<Base
+  title="Flugbuch"
+  description="Flugbuch: jeder Flug mit Ort, Flugmodus, Akkus, Flugzeit, Bedingungen und Vorkommnissen."
+  path="/flugbuch"
+>
+  <SectionHead
+    index="07"
+    title="Flugbuch"
+    lead="Jeder Flug mit Ort, Modus, Akkus und Bedingungen. Nicht als Pflichtübung, sondern weil sich nach ein paar Monaten ablesen lässt, bei welchem Wind es gut lief und wo die Propeller geblieben sind."
+    meta={flights.length > 0 ? `${flights.length} Flüge` : 'noch kein Eintrag'}
+  />
+
+  <div class="tiles">
+    <StatTile value={stats.flights} label="Flüge" tone={stats.flights > 0 ? 'accent' : 'idle'} />
+    <StatTile
+      value={stats.airtimeMin === 0 ? '0' : fmtDuration(stats.airtimeMin)}
+      label="Flugzeit"
+      tone="idle"
+    />
+    <StatTile value={stats.packs} label="Akkus geflogen" tone="idle" />
+    <StatTile
+      value={stats.crashes}
+      label="Crashes"
+      tone={stats.crashes > 0 ? 'alert' : 'idle'}
+      hint="ehrlich zählen, nicht schönrechnen"
+    />
+  </div>
+
+  {
+    flights.length > 0 ? (
+      <Panel label="Alle Flüge" meta={`${flights.length} Einträge`} flush>
+        <div class="scroll-x">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Datum</th>
+                <th>Ort</th>
+                <th>Modus</th>
+                <th>Akkus</th>
+                <th>Zeit</th>
+                <th>Wind</th>
+                <th>Crash</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                flights.map((f) => (
+                  <tr>
+                    <td class="mono">
+                      <a href={href(`/flugbuch/${f.id}`)}>{fmtDate(f.data.date)}</a>
+                    </td>
+                    <td>{f.data.spot}</td>
+                    <td class="mono">{MODE_LABEL[f.data.mode]}</td>
+                    <td class="mono">{f.data.packs}</td>
+                    <td class="mono">{Math.round(f.data.airtimeMin)} min</td>
+                    <td class="mono">{f.data.windMs != null ? `${f.data.windMs} m/s` : '—'}</td>
+                    <td class={f.data.crashes > 0 ? 'mono alert' : 'mono'}>{f.data.crashes}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </Panel>
+    ) : (
+      <Panel label="Status" meta="Pre-Flight">
+        <EmptyState
+          code="FLT 00"
+          title="Noch kein Flug — die Hardware ist unterwegs"
+          reason="Avata 2, Goggles 3 und der FPV Remote Controller 3 sind bestellt. Vor dem ersten Start fehlen außerdem noch Versicherung, LBA-Registrierung und der A1/A3-Nachweis — in dieser Reihenfolge."
+          next="Papierkram abschließen, dann offenes Feld im Normal-Modus mit Höhenlimit 30 m."
+        >
+          <div class="empty-actions">
+            <a class="btn" href={href('/papierkram')}>Papierkram</a>
+            <a class="btn" href={href('/wetter')}>Wetter-Briefing</a>
+            <a class="btn" href={href('/checklisten')}>Pre-Flight-Checkliste</a>
+          </div>
+        </EmptyState>
+      </Panel>
+    )
+  }
+
+  {
+    vorlage && (
+      <Panel label="Vorlage" meta="so sieht ein Eintrag aus">
+        <p class="txt">
+          Die Datei <code>src/content/flights/_vorlage.md</code> zeigt die Felder. Kopieren,
+          umbenennen, <code>template</code> auf <code>false</code> setzen — dann steht der Flug in
+          der Tabelle und läuft in die Statistik.
+        </p>
+        <div class="preview">
+          <div class="p-row"><span>Datum</span><b>{fmtDate(vorlage.data.date)}</b></div>
+          <div class="p-row"><span>Ort</span><b>{vorlage.data.spot}</b></div>
+          <div class="p-row"><span>Modus</span><b>{MODE_LABEL[vorlage.data.mode]}</b></div>
+          <div class="p-row"><span>Akkus</span><b>{vorlage.data.packs}</b></div>
+          <div class="p-row"><span>Flugzeit</span><b>{vorlage.data.airtimeMin} min</b></div>
+          <div class="p-row"><span>Wind</span><b>{vorlage.data.windMs} m/s</b></div>
+          <div class="p-row"><span>Crashes</span><b>{vorlage.data.crashes}</b></div>
+        </div>
+        <p class="txt small">
+          Vorlagen zählen nicht in die Statistik — dafür sorgt das Feld <code>template</code>.
+        </p>
+      </Panel>
+    )
+  }
+</Base>
+
+<style>
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--s3);
+    margin-bottom: var(--s5);
+  }
+  .mono { font-family: var(--font-mono); font-size: var(--fs-micro); white-space: nowrap; }
+  .alert { color: var(--armed); }
+
+  .empty-actions {
+    margin-top: var(--s5);
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--s3);
+  }
+
+  .txt { font-size: var(--fs-small); color: var(--muted); max-width: 74ch; }
+  .txt.small { margin-top: var(--s4); font-size: var(--fs-tiny); }
+
+  .preview {
+    margin-top: var(--s4);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .p-row {
+    background: var(--panel-sunk);
+    padding: var(--s3);
+    display: grid;
+    gap: 2px;
+  }
+  .p-row span {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    color: var(--muted-deep);
+  }
+  .p-row b { font-family: var(--font-mono); font-size: var(--fs-small); color: var(--text-dim); font-weight: 500; }
+</style>

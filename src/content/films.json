@@ -1,0 +1,62 @@
+[
+  {
+    "id": "right-up-our-alley",
+    "title": "Right Up Our Alley",
+    "kind": "clip",
+    "year": 2021,
+    "by": "Jay Christensen / jaybyrdfilms",
+    "url": "https://www.youtube.com/watch?v=VgS54fqKxf0",
+    "order": 1,
+    "why": "Der Clip, der FPV über die Szene hinaus bekannt gemacht hat: ein einziger ununterbrochener Flug durch eine Bowlingbahn in Minneapolis — durch Türen, über Bahnen, hinter die Kegel und wieder hinaus. Ging weit über Drohnenkreise hinaus viral und wurde zur Referenz dafür, was ein One-Take leisten kann.",
+    "learn": "Ein Durchgang ohne Schnitt heißt: jeder Fehler kostet den ganzen Take. Was hier mühelos wirkt, sind unzählige Wiederholungen derselben Linie — genau die Fähigkeit, die im Simulator trainiert wird.",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "real-life-video-game",
+    "title": "Real Life Video Game (1 LIFE) — RAW City Flight",
+    "kind": "clip",
+    "year": 2019,
+    "by": "Mr Steele",
+    "url": "https://www.youtube.com/watch?v=dwde9xLyB_s",
+    "order": 2,
+    "why": "Ein einziger Akku, ein Durchgang, keine zweite Chance — Freestyle durch eine Stadt, ohne Sicherheitsnetz. Zeigt Mr Steeles Handschrift in Reinform: weiche Übergänge statt harter Tricks.",
+    "learn": "Wie viel Ruhe im Throttle steckt. Die Drohne fällt hier nie, sie sinkt — das ist der Unterschied zwischen Können und Glück.",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "welcome-to-paradise",
+    "title": "Welcome to Paradise — Miami FPV Freestyle",
+    "kind": "clip",
+    "year": 2018,
+    "by": "Johnny FPV",
+    "url": "https://www.youtube.com/watch?v=JAWXrtIfY9o",
+    "order": 3,
+    "why": "Der cineastische Gegenentwurf zum Bando-Freestyle: Licht, Location und Schnitt zählen genauso viel wie der Flug selbst. Hat den Ton für das gesetzt, was heute als „cinematic FPV“ gilt.",
+    "learn": "Dass die Uhrzeit über die Aufnahme entscheidet. Dieselbe Linie zur Mittagszeit sähe belanglos aus — deshalb steht die goldene Stunde im Wetter-Briefing.",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "drive2extremes",
+    "title": "Drive2Extremes — Taycan Cross Turismo",
+    "kind": "clip",
+    "year": 2021,
+    "by": "Johnny FPV",
+    "url": "https://www.youtube.com/watch?v=1U2aVQDbJ3o",
+    "order": 4,
+    "why": "FPV in einer großen Markenproduktion. Interessant weniger wegen des Autos als wegen der Frage, wie eine Drohnenkamera zur eigentlichen Erzählstimme eines Films wird.",
+    "learn": "Wie Verfolgungsaufnahmen aufgebaut sind: Die Drohne ist selten dort, wo man sie vermutet, und der Eindruck von Tempo entsteht durch Nähe zu Objekten, nicht durch Geschwindigkeit.",
+    "verified": "2026-08-30"
+  },
+  {
+    "id": "flowstate",
+    "title": "FlowState — The FPV Drone Documentary",
+    "kind": "doc",
+    "year": 2024,
+    "by": "Joshua Bardwell",
+    "url": "https://www.youtube.com/watch?v=UoMWFrqOmQo",
+    "order": 5,
+    "why": "Abendfüllende Dokumentation über die FPV-Szene: woher sie kommt, wer sie geprägt hat und warum Menschen so viel Zeit in eine Sache stecken, die regelmäßig gegen Bäume fliegt.",
+    "learn": "Der beste Einstieg, um die Kultur hinter der Technik zu verstehen — inklusive der Leute, die in den Kanälen weiter oben auftauchen.",
+    "verified": "2026-08-30"
+  }
+]

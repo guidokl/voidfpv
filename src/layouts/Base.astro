@@ -27,7 +27,7 @@ const item = findNavItem(navPath);
 const group = findNavGroup(navPath);
 const activeTabs = hideTabs ? undefined : (tabs ?? item?.tabs);
 
-const fullTitle = navPath === '/' ? 'VOID FPV — Flight Deck' : `${title} · VOID FPV`;
+const fullTitle = navPath === '/' ? 'NEAP FPV — Flight Deck' : `${title} · NEAP FPV`;
 ---
 
 <!doctype html>
@@ -64,7 +64,7 @@ const fullTitle = navPath === '/' ? 'VOID FPV — Flight Deck' : `${title} · VO
 
       <footer class="foot">
         <div class="foot-inner">
-          <span class="mono-label">VOID//FPV · privates Logbuch, kein kommerzielles Angebot</span>
+          <span class="mono-label">NEAP//FPV · privates Logbuch, kein kommerzielles Angebot</span>
           <nav class="foot-links">
             <a href={href('/impressum')}>Impressum</a>
             <a href={href('/datenschutz')}>Datenschutz</a>

@@ -1,10 +1,17 @@
 ---
-import { NAV } from '~/lib/nav';
+import { NAV, type NavTab } from '~/lib/nav';
 import { href, isActive, fmtDuration, fmtIso } from '~/lib/format';
 import { getStats } from '~/lib/stats';
 
+interface Props {
+  /** Unterpunkte der aktuell aktiven Seite — ersetzt den frueheren Top-Tab-Streifen */
+  activeTabs?: NavTab[];
+}
+const { activeTabs } = Astro.props;
+
 const stats = await getStats();
 const current = Astro.url.pathname;
+const resolveTab = (h: string) => (h.startsWith('#') ? h : href(h));
 ---
 
 <nav class="rail" id="rail" aria-label="Hauptnavigation">
@@ -21,17 +28,43 @@ const current = Astro.url.pathname;
           <ul>
             {group.items.map((item) => {
               const active = isActive(current, item.path);
+              const tabs = active ? activeTabs : undefined;
+              const hasTabs = !!tabs && tabs.length > 0;
               return (
-                <li>
-                  <a
-                    href={href(item.path)}
-                    class:list={['item', active && 'is-active']}
-                    aria-current={active ? 'page' : undefined}
-                    title={item.blurb}
-                  >
-                    <span class="idx">{item.index}</span>
-                    <span class="label">{item.label}</span>
-                  </a>
+                <li class="nav-li">
+                  <div class="item-row">
+                    <a
+                      href={href(item.path)}
+                      class:list={['item', active && 'is-active']}
+                      aria-current={active ? 'page' : undefined}
+                      title={item.blurb}
+                    >
+                      <span class="idx">{item.index}</span>
+                      <span class="label">{item.label}</span>
+                    </a>
+                    {hasTabs && (
+                      <button
+                        type="button"
+                        class="caret"
+                        data-subnav-toggle
+                        aria-expanded="true"
+                        aria-label={`Unterpunkte von ${item.label}`}
+                      >
+                        <span class="chev" aria-hidden="true"></span>
+                      </button>
+                    )}
+                  </div>
+                  {hasTabs && (
+                    <ul class="subnav" data-subnav>
+                      {tabs!.map((t) => (
+                        <li>
+                          <a class="sub-item" data-sub-link href={resolveTab(t.href)}>
+                            {t.label}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </li>
               );
             })}
@@ -116,10 +149,13 @@ const current = Astro.url.pathname;
   }
   ul { list-style: none; margin: 0; padding: 0; }
 
+  .item-row { display: flex; align-items: stretch; }
   .item {
     position: relative;
     display: flex;
     align-items: center;
+    flex: 1;
+    min-width: 0;
     gap: var(--s3);
     padding: 7px var(--s5);
     border-bottom: none;
@@ -127,6 +163,47 @@ const current = Astro.url.pathname;
     transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease);
   }
   .item:hover { color: var(--text); background: var(--panel-hi); }
+
+  /* --- Aufklappbares Submenue: ersetzt den frueheren Top-Tab-Streifen --- */
+  .caret {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    flex: none;
+    color: var(--muted-deep);
+    transition: color var(--dur) var(--ease);
+  }
+  .caret:hover { color: var(--accent); }
+  .chev {
+    width: 6px;
+    height: 6px;
+    border-right: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform var(--dur) var(--ease);
+  }
+  .caret[aria-expanded='false'] .chev { transform: rotate(-45deg); }
+
+  .subnav {
+    list-style: none;
+    margin: 0;
+    padding: 2px 0 6px;
+  }
+  .subnav[hidden] { display: none; }
+  .sub-item {
+    display: block;
+    padding: 5px var(--s5) 5px calc(var(--s5) + 20px);
+    color: var(--muted-deep);
+    border-bottom: none;
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--tr-mid);
+    text-transform: uppercase;
+    border-left: 2px solid transparent;
+    transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+  .sub-item:hover { color: var(--text); }
+  .sub-item.is-current { color: var(--accent); border-left-color: var(--accent); }
 
   .idx {
     font-family: var(--font-mono);
@@ -198,3 +275,49 @@ const current = Astro.url.pathname;
     .rail.is-open { transform: translateX(0); }
   }
 </style>
+
+<script>
+  // Aufklappbares Submenue statt des frueheren Top-Tab-Streifens.
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-subnav-toggle]')) {
+    btn.addEventListener('click', () => {
+      const sub = btn.closest('.nav-li')?.querySelector<HTMLElement>('[data-subnav]');
+      if (!sub) return;
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      sub.hidden = expanded;
+    });
+  }
+
+  // Markiert den Unterpunkt, dessen Abschnitt gerade im Blick ist — nur fuer
+  // Anker-Links (#...) auf der aktuellen Seite, externe Unterseiten bleiben unberuehrt.
+  const subLinks = Array.from(
+    document.querySelectorAll<HTMLAnchorElement>('[data-sub-link]'),
+  ).filter((a) => a.getAttribute('href')?.startsWith('#'));
+
+  if (subLinks.length) {
+    const map = new Map<string, HTMLAnchorElement>();
+    const targets: Element[] = [];
+    for (const a of subLinks) {
+      const id = a.getAttribute('href')!.slice(1);
+      const el = document.getElementById(id);
+      if (el) {
+        map.set(id, a);
+        targets.push(el);
+      }
+    }
+
+    const visible = new Set<string>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) visible.add(e.target.id);
+          else visible.delete(e.target.id);
+        }
+        const firstVisible = targets.find((t) => visible.has(t.id));
+        for (const [id, a] of map) a.classList.toggle('is-current', id === firstVisible?.id);
+      },
+      { rootMargin: '-45% 0px -50% 0px', threshold: 0 },
+    );
+    targets.forEach((t) => io.observe(t));
+  }
+</script>

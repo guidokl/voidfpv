@@ -2,7 +2,6 @@
 import '~/styles/global.css';
 import Rail from '~/components/Rail.astro';
 import TopBar from '~/components/TopBar.astro';
-import TabBar from '~/components/TabBar.astro';
 import { findNavItem, findNavGroup, normalizePath } from '~/lib/nav';
 import { href } from '~/lib/format';
 
@@ -51,12 +50,11 @@ const fullTitle = navPath === '/' ? 'NEAP FPV — Flight Deck' : `${title} · NE
   <body>
     <a class="skip-link" href="#main">Zum Inhalt</a>
 
-    <Rail />
+    <Rail activeTabs={activeTabs} />
     <div class="scrim" data-nav-close aria-hidden="true"></div>
 
     <div class="shell">
       <TopBar group={group?.label} title={title} />
-      {activeTabs && activeTabs.length > 0 && <TabBar tabs={activeTabs} />}
 
       <main id="main" class="main">
         <slot />
